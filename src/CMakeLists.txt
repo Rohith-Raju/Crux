@@ -3,7 +3,9 @@ set(Sources Error.cpp
 
 set(Headers Error.h
         Scanner.h
-        Token.h)
+        Token.h
+        Expr.h
+)
 
 
 add_library(${CMAKE_PROJECT_NAME}_lib STATIC ${Sources} ${Headers})

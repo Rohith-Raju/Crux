@@ -31,17 +31,17 @@ enum TokenType {
 
 struct null{};
 
-using Literal = std::variant<null,size_t,std::string>;
+using object = std::variant<null,size_t,std::string>;
 
 
 class Token {
 public:
     TokenType type;
     std::string lexeme;
-    Literal literal;
+    object literal;
     int line;
 
-    Token(TokenType type, std::string lexeme,Literal literal, int line ):type(type),lexeme(lexeme),literal(literal),line(line)
+    Token(TokenType type, std::string lexeme,object literal, int line ):type(type),lexeme(lexeme),literal(literal),line(line)
     {}
 };
 

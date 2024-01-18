@@ -37,7 +37,7 @@ public:
     void scanToken();
     void identifier();
     void addToken(TokenType type);
-    void addToken(TokenType type, Literal literal);
+    void addToken(TokenType type, object literal);
 };
 
 #endif //CRUX_SCANNER_H
