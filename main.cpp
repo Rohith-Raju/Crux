@@ -1,4 +1,4 @@
-#include "src/Scanner.h"
+#include "Scanner.h"
 #include <iostream>
 
 void runCode(std::string source);

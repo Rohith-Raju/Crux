@@ -1,10 +1,10 @@
 set(Sources Error.cpp
-        Scanner.cpp)
-
-set(Headers Error.h
-        Scanner.h
-        Token.h
-        Expr.h
+        Scanner.cpp
+        AstPrettyPrint.cpp
+        Expr/BinaryExp.cpp
+        Expr/LiteralExp.cpp
+        Expr/Grouping.cpp
+        Expr/UnaryExp.cpp
 )
 
 
