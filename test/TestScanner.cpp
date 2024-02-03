@@ -13,6 +13,16 @@ TEST(ScannerCheck, TestSingleToken){
     ASSERT_EQ(scan.tokens[1].type, ENDOFFILE);
 }
 
+TEST(ScannerCheck, TestSingleLiteral){
+    Scanner scan ("8");
+    scan.scanTokens();
+    ASSERT_EQ(scan.tokens.size(), 2);
+    ASSERT_EQ(scan.tokens[0].type, NUMBER);
+    ASSERT_EQ(scan.tokens[0].lexeme, "8");
+    ASSERT_EQ(scan.tokens[1].type, ENDOFFILE);
+}
+
+
 TEST(ScannerCheck, TestMultipleToken){
     Scanner scan ("(+{})");
     scan.scanTokens();
@@ -24,4 +34,13 @@ TEST(ScannerCheck, TestMultipleToken){
     ASSERT_EQ(scan.tokens[4].type, RIGHT_PAREN);
     ASSERT_EQ(scan.tokens[5].type, ENDOFFILE);
 
+}
+
+TEST(ScannerCheck, TestStatement){
+    Scanner scan ("a = 40");
+    scan.scanTokens();
+    ASSERT_EQ(scan.tokens.size(), 4);
+    ASSERT_EQ(scan.tokens[0].type, IDENTIFIER);
+    ASSERT_EQ(scan.tokens[1].type, EQUAL);
+    ASSERT_EQ(scan.tokens[2].type, NUMBER);
 }

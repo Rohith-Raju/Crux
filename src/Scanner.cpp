@@ -85,16 +85,16 @@ void Scanner::scanToken() {
             break;
         case '"':
             string();
+            break;
         default:
             if(isDigit(c)){
                 number();
-            }
-            if(isAlpha(c)){
+            }else if (isAlpha(c)){
                 identifier();
-            }
-            else{
+            }else{
                 error(line,"Unexpected character");
             }
+            break;
     }
 
 }
@@ -130,7 +130,7 @@ bool Scanner::match(char expected) {
 }
 
 bool Scanner::isDigit(char c) {
-    return c > '0' && c <='9';
+    return c >= '0' && c <='9';
 }
 
 bool Scanner::isAlpha(char c) {
