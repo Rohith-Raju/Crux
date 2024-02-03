@@ -8,6 +8,5 @@ include_directories(include)
 add_subdirectory(src)
 add_subdirectory(test)
 
-add_executable(${CMAKE_PROJECT_NAME}_run main.cpp
-        include/PrettyPrinter.h)
+add_executable(${CMAKE_PROJECT_NAME}_run main.cpp)
 target_link_libraries(${CMAKE_PROJECT_NAME}_run ${CMAKE_PROJECT_NAME}_lib)
