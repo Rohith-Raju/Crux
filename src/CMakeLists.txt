@@ -1,5 +1,6 @@
 set(Sources Error.cpp
         Scanner.cpp
+        Parser.cpp
 )
 
 

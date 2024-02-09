@@ -8,5 +8,6 @@ include_directories(include)
 add_subdirectory(src)
 add_subdirectory(test)
 
-add_executable(${CMAKE_PROJECT_NAME}_run main.cpp)
+add_executable(${CMAKE_PROJECT_NAME}_run main.cpp
+        include/Parser.h)
 target_link_libraries(${CMAKE_PROJECT_NAME}_run ${CMAKE_PROJECT_NAME}_lib)
