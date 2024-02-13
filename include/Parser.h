@@ -17,9 +17,11 @@
 
 class Parser{
 private:
+struct ParseError: public std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
     std::vector<Token> tokens;
     int current = 0;
-    Parser(std::vector<Token> tokens);
     std::shared_ptr<Expr> expression();
     std::shared_ptr<Expr> comparison();
     std::shared_ptr<Expr> term();
@@ -34,10 +36,14 @@ private:
     bool isAtEnd();
     Token peek();
     Token previous();
-    Token consume(TokenType type, const char* message);
+    Token consume(TokenType type, std::string message);
     template<class... T>
     bool match(T... type);
+    ParseError error(Token token, std::string message);
+    void synchronize();
 public:
+    Parser(const std::vector<Token>& tokens)
+            : tokens{tokens}{};
     std::shared_ptr<Expr>parse();
 };
 

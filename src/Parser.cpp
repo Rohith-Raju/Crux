@@ -3,7 +3,13 @@
 //
 #include "Parser.h"
 
-Parser::Parser(std::vector<Token> tokens) : tokens(tokens){};
+std::shared_ptr<Expr> Parser::parse() {
+    try{
+        return expression();
+    }catch (ParseError error){
+        return nullptr;
+    }
+}
 
 std::shared_ptr<Expr> Parser::expression() {
     return equality();
@@ -72,9 +78,13 @@ std::shared_ptr<Expr> Parser::primary() {
         consume(RIGHT_PAREN, "Expect ')' after expression.");
         return std::make_shared<GroupingExp>(expr);
     }
-    //todo: add parser error handling
-    error(peek().line, "Expect expression.");
+    throw error(peek(), "Expect expression.");
+}
 
+Token Parser::consume(TokenType type, std::string message) {
+    if (check(type)) return advance();
+
+    throw error(peek(), message);
 }
 
 template<class ...T>
@@ -92,6 +102,7 @@ bool Parser::check(TokenType type) {
     return peek().type == type;
 }
 
+
 Token Parser::advance() {
     if(!isAtEnd()) ++current;
     return previous();
@@ -104,3 +115,34 @@ Token Parser::previous() {
 Token Parser::peek() {
     return tokens[current++];
 }
+
+bool Parser::isAtEnd() {
+    return peek().type == ENDOFFILE;
+}
+
+typename Parser::ParseError
+Parser::error(Token token, std::string message) {
+    crux::error(token, message);
+    return ParseError("");
+}
+
+void Parser::synchronize() {
+    advance();
+
+    while (!isAtEnd()){
+        if(previous().type == SEMICOLON) return;
+        switch (peek().type) {
+            case CLASS:
+            case FUN:
+            case VAR:
+            case FOR:
+            case IF:
+            case WHILE:
+            case PRINT:
+            case RETURN:
+                return;
+        }
+        advance();
+    }
+}
+

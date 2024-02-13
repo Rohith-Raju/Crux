@@ -5,11 +5,17 @@
 #ifndef CRUX_ERROR_H
 #define CRUX_ERROR_H
 
+#include <string>
+#include "Token.h"
 
-extern bool hasError;
+namespace crux {
 
-void report(int line, const char *message);
+    extern bool hasError;
 
-void error(int line, const char *message);
+    void report(int line, std::string_view where, std::string_view message);
 
+    void error(Token &token, std::string_view message);
+
+    void error(int line, std::string_view message);
+}
 #endif //CRUX_ERROR_H

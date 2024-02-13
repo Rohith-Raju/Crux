@@ -5,7 +5,8 @@ file(GLOB_RECURSE SOURCES TestScanner.cpp)
 add_subdirectory(lib)
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 add_executable(run_crux_test ${SOURCES}
-        TestAst.cpp)
+        TestAst.cpp
+        TestParser.cpp)
 
 add_custom_target(
     update_submodules

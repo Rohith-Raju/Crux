@@ -92,7 +92,7 @@ void Scanner::scanToken() {
             }else if (isAlpha(c)){
                 identifier();
             }else{
-                error(line,"Unexpected character");
+                crux::error(line,"Unexpected character");
             }
             break;
     }
@@ -105,7 +105,7 @@ void Scanner::string(){
         advance();
     }
     if (isAtEnd()) {
-       error(line, "Unterminated string");
+       crux::error(line, "Unterminated string");
     }
     advance();
     std::string value = source.substr(start+1, current-1);

@@ -4,7 +4,7 @@
 #include "gtest/gtest.h"
 #include "PrettyPrinter.h"
 
-TEST(AstPrinter, TestExpresson){
+TEST(AstPrinterCheck, TestExpresson){
     std::shared_ptr<Expr> expression = std::make_shared<BinaryExp>(
             std::make_shared<UnaryExp>(
                     Token{MINUS, "-", {}, 1},

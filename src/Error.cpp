@@ -5,14 +5,22 @@
 #include "Error.h"
 #include <iostream>
 
-bool hasError = false;
+bool crux::hasError = false;
 
-void error(int line, const char *message) {
-    report(line, message);
+void crux::error(Token &token, std::string_view message) {
+    if (token.type == EOF) {
+        report(token.line, "at end", message);
+    } else {
+        report(token.line, "at", message);
+    }
 }
 
 
-void report(int line, const char *message) {
+void crux::report(int line,  std::string_view where, std::string_view message) {
 std::cout<<"[line "<<line<<"]"<<"Error "<<": "<<message<<std::endl;
 hasError = true;
+}
+
+void crux::error(int line, std::string_view message) {
+    crux::report(line, "", message);
 }
