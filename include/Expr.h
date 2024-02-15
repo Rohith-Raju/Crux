@@ -80,8 +80,8 @@ public:
 
 class LiteralExp : public Expr, public std::enable_shared_from_this<LiteralExp> {
 public:
-    std::any literal;
-    LiteralExp(std::any literal):literal(std::move(literal)){}
+    object literal;
+    LiteralExp(object literal):literal(std::move(literal)){}
     std::any accept(ExprVisitor& visitor) override {
         return visitor.visitLiteral(shared_from_this());
     }

@@ -44,3 +44,12 @@ TEST(ScannerCheck, TestStatement){
     ASSERT_EQ(scan.tokens[1].type, EQUAL);
     ASSERT_EQ(scan.tokens[2].type, NUMBER);
 }
+
+TEST(ScannerCheck, TestLexeme){
+    Scanner scan ("b = 30");
+    scan.scanTokens();
+    ASSERT_EQ(scan.tokens[0].lexeme, "b");
+    ASSERT_EQ(scan.tokens[1].lexeme, "=");
+    ASSERT_EQ(scan.tokens[2].lexeme, "30");
+    ASSERT_EQ(scan.tokens[3].lexeme, "");
+}

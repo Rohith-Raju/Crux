@@ -117,7 +117,7 @@ void Scanner::addToken(TokenType type) {
 }
 
 void Scanner::addToken(TokenType type, object literal){
-    std::string text = source.substr(start, current);
+    std::string text = source.substr(start, current-start);
     tokens.push_back(Token(type,text,literal,line));
 
 }
@@ -145,8 +145,7 @@ void Scanner::number() {
         advance();
         while (isDigit(peek())) advance();
     }
-    size_t num;
-    std::stoi(source.substr(start,current), &num);
+    double num = std::stoi(source.substr(start,current-start));
     addToken(NUMBER, num);
 }
 
@@ -156,7 +155,7 @@ bool Scanner::isAlphaNumeric(char c) {
 
 void Scanner::identifier() {
     while (isAlphaNumeric(peek())) advance();
-    std::string text = source.substr(start,current);
+    std::string text = source.substr(start,current-start);
     if(tkn::keywords[text]) addToken(tkn::keywords[text]);
     else addToken(IDENTIFIER);
 }

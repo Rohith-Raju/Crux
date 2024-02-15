@@ -38,16 +38,16 @@ public:
     }
     std::any visitLiteral(std::shared_ptr<LiteralExp> expr) override {
 
-        auto& value_type = expr->literal.type();
+        object literal = expr->literal;
 
-        if (value_type == typeid(nullptr)) {
+        if (std::get_if<std::string>(&literal)){
             return "nil";
-        } else if (value_type == typeid(std::string)) {
-            return std::any_cast<std::string>(expr->literal);
-        } else if (value_type == typeid(double)) {
-            return std::to_string(std::any_cast<double>(expr->literal));
-        } else if (value_type == typeid(bool)) {
-            return std::any_cast<bool>(expr->literal) ? "true" : "false";
+        } else if (std::string* string_data =  std::get_if<std::string>(&literal)) {
+            return *string_data;
+        } else if (double* double_data =  std::get_if<double>(&literal)) {
+            return std::to_string(*double_data);
+        } else if (bool* bool_data =  std::get_if<bool>(&literal)) {
+            return *bool_data ? std::string ("true"): std::string("false");
         }
         return "Error in visitLiteralExpr: literal type not recognized.";
     }

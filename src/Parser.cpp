@@ -113,7 +113,7 @@ Token Parser::previous() {
 }
 
 Token Parser::peek() {
-    return tokens[current++];
+    return tokens[current];
 }
 
 bool Parser::isAtEnd() {

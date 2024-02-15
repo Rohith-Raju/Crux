@@ -31,7 +31,7 @@ enum TokenType {
 
 struct null{};
 
-using object = std::variant<null,size_t,std::string>;
+using object = std::variant<null,double,std::string,bool>;
 
 
 class Token {
