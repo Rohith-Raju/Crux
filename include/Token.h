@@ -7,6 +7,7 @@
 
 #include <string>
 #include <map>
+#include "utls/Object.h"
 
 enum TokenType {
     // Single-character tokens.
@@ -31,17 +32,15 @@ enum TokenType {
 
 struct null{};
 
-using object = std::variant<null,double,std::string,bool>;
-
 
 class Token {
 public:
     TokenType type;
     std::string lexeme;
-    object literal;
+    Object literal;
     int line;
 
-    Token(TokenType type, std::string lexeme,object literal, int line ):type(type),lexeme(lexeme),literal(literal),line(line)
+    Token(TokenType type, std::string lexeme,Object literal, int line ):type(type),lexeme(lexeme),literal(std::move(literal)),line(line)
     {}
 };
 

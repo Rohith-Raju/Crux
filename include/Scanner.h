@@ -37,7 +37,8 @@ public:
     void scanToken();
     void identifier();
     void addToken(TokenType type);
-    void addToken(TokenType type, object literal);
+    void addNumber(double num);
+    void addString(std::string string);
 };
 
 #endif //CRUX_SCANNER_H

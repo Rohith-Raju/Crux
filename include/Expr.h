@@ -48,7 +48,6 @@ public:
     std::any accept(ExprVisitor &visitor) override {
         return visitor.visitBinaryExp(shared_from_this());
     }
-
 };
 
 class GroupingExp: public Expr, public std::enable_shared_from_this<GroupingExp> {
@@ -80,8 +79,8 @@ public:
 
 class LiteralExp : public Expr, public std::enable_shared_from_this<LiteralExp> {
 public:
-    object literal;
-    LiteralExp(object literal):literal(std::move(literal)){}
+    Object literal;
+    LiteralExp(Object literal):literal(std::move(literal)){}
     std::any accept(ExprVisitor& visitor) override {
         return visitor.visitLiteral(shared_from_this());
     }

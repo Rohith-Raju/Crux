@@ -65,12 +65,12 @@ std::shared_ptr<Expr> Parser::unary() {
 }
 
 std::shared_ptr<Expr> Parser::primary() {
-    if (match(FALSE)) return std::make_shared<LiteralExp>(false);
-    if (match(TRUE)) return std::make_shared<LiteralExp>(true);
-    if (match(NIL)) return std::make_shared<LiteralExp>(nullptr);
+    if (match(FALSE)) return std::make_shared<LiteralExp>(Object(false));
+    if (match(TRUE)) return std::make_shared<LiteralExp>(Object(true));
+    if (match(NIL)) return std::make_shared<LiteralExp>(Object());
 
     if (match(NUMBER, STRING)) {
-        return std::make_shared<LiteralExp>(previous().literal);
+        return std::make_shared<LiteralExp>(Object(previous().literal));
     }
 
     if (match(LEFT_PAREN)) {
