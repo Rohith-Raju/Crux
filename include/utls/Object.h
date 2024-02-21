@@ -11,12 +11,11 @@ enum ObjType{
     nullptr_type, num_type, string_type, bool_type,
 };
 class Object{
-private:
+public:
     ObjType type;
     bool bool_literal;
     double num_literal;
     std::string string_literal;
-public:
     Object();
     Object(bool type);
     Object(double type);

@@ -45,7 +45,7 @@ public:
             assert(this->left != nullptr);
             assert(this->right != nullptr);
     }
-    std::any accept(ExprVisitor &visitor) override {
+    std::any accept(ExprVisitor& visitor) override {
         return visitor.visitBinaryExp(shared_from_this());
     }
 };
