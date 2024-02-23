@@ -19,7 +19,8 @@ std::vector<Token> Scanner::scanTokens() {
         start = current;
         scanToken();
     }
-    tokens.push_back(Token(ENDOFFILE, "" , null{}, line));
+    Object null;
+    tokens.push_back(Token(ENDOFFILE, "" , &null , line));
     return tokens;
 }
 
@@ -109,17 +110,23 @@ void Scanner::string(){
     }
     advance();
     std::string value = source.substr(start+1, current-1);
-    addToken(STRING, value);
+    addString(value);
 }
 
 void Scanner::addToken(TokenType type) {
-    addToken(type, null{});
+    std::string text = source.substr(start, current-start);
+    tokens.push_back(Token(type,text,Object{},line));
 }
 
-void Scanner::addToken(TokenType type, object literal){
-    std::string text = source.substr(start, current-start);
-    tokens.push_back(Token(type,text,literal,line));
+void Scanner::addNumber(double num) {
+    std::string text = source.substr(start, current - start);
+    tokens.push_back(Token(NUMBER,text,Object(num),line));
+}
 
+void Scanner::addString(std::string string) {
+    std::string text = source.substr(start, current - start);
+    Object obj(string);
+    tokens.push_back(Token(STRING,text,Object(string),line));
 }
 
 bool Scanner::match(char expected) {
@@ -146,7 +153,7 @@ void Scanner::number() {
         while (isDigit(peek())) advance();
     }
     double num = std::stoi(source.substr(start,current-start));
-    addToken(NUMBER, num);
+    addNumber(num);
 }
 
 bool Scanner::isAlphaNumeric(char c) {

@@ -37,19 +37,7 @@ public:
         return parenthesize(expr->op.lexeme, expr->right);
     }
     std::any visitLiteral(std::shared_ptr<LiteralExp> expr) override {
-
-        object literal = expr->literal;
-
-        if (std::get_if<std::string>(&literal)){
-            return "nil";
-        } else if (std::string* string_data =  std::get_if<std::string>(&literal)) {
-            return *string_data;
-        } else if (double* double_data =  std::get_if<double>(&literal)) {
-            return std::to_string(*double_data);
-        } else if (bool* bool_data =  std::get_if<bool>(&literal)) {
-            return *bool_data ? std::string ("true"): std::string("false");
-        }
-        return "Error in visitLiteralExpr: literal type not recognized.";
+        return expr->literal.str();
     }
 
 };

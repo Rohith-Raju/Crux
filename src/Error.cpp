@@ -6,6 +6,7 @@
 #include <iostream>
 
 bool crux::hasError = false;
+bool crux::hadRuntimeError = false;
 
 void crux::error(Token &token, std::string_view message) {
     if (token.type == EOF) {
@@ -23,4 +24,10 @@ hasError = true;
 
 void crux::error(int line, std::string_view message) {
     crux::report(line, "", message);
+}
+
+void crux::runtimeError(RuntimeError &error) {
+    std::cerr << error.what() <<
+    "\n[line " << error.token.line << "]\n";
+    hadRuntimeError = true;
 }

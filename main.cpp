@@ -2,6 +2,7 @@
 #include <iostream>
 #include <Parser.h>
 #include "PrettyPrinter.h"
+#include "Interpreter.h"
 
 void runCode(std::string source);
 
@@ -17,6 +18,7 @@ void runPromt(){
         }
         runCode(line);
         if(crux::hasError) exit(1);
+        if(crux::hadRuntimeError) exit(1);
     }
 }
 
@@ -25,8 +27,8 @@ void runCode(std::string source){
     std::vector<Token> tokens = scanner.scanTokens();
     Parser parser(tokens);
     std::shared_ptr<Expr> expression = parser.parse();
-    std::cout<<AstPrinter{}.print(expression)<<std::endl;
-
+    std::unique_ptr<Interpreter> interpreter = std::make_unique<Interpreter>();
+    interpreter->interpret(expression);
 }
 
 int main() {
