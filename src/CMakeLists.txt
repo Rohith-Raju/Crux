@@ -2,6 +2,7 @@ set(Sources Error.cpp
         Scanner.cpp
         Parser.cpp
         utls/Object.cpp
+        Expr.cpp
 )
 
 

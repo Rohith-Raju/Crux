@@ -23,22 +23,23 @@ private:
         return builder.str();
     }
 public:
-    std::string print(std::shared_ptr<Expr> expr){
-        return std::any_cast<std::string>(expr->accept(*this));
+    std::string print(Expr* expr){
+        return vist(expr);
     }
-    std::any visitBinaryExp(std::shared_ptr<BinaryExp> expr) override {
-        return parenthesize(expr->op.lexeme,
-                            expr->left, expr->right);
+     std::string visitBinaryExp(Expr* expr)  {
+        return parenthesize();
     }
-    std::any visitGroupExp(std::shared_ptr<GroupingExp> expr) override {
-        return parenthesize("Group",expr->expr);
+    std::string visitGroupExp(std::shared_ptr<GroupingExp> expr)  {
+        return parenthesize();
     }
-    std::any visitUnaryExp(std::shared_ptr<UnaryExp> expr) override {
-        return parenthesize(expr->op.lexeme, expr->right);
+    std::string visitUnaryExp(Unary* expr)  {
+        return parenthesize();
     }
-    std::any visitLiteral(std::shared_ptr<LiteralExp> expr) override {
-        return expr->literal.str();
+    std::string visitLiteral(Literal* expr)  {
+        return expr->literal->str();
     }
+
+    std::string vist(Expr* expr)
 
 };
 
