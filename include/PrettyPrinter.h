@@ -6,42 +6,60 @@
 #define CRUX_PRETTYPRINTER_H
 
 #include "Expr.h"
-#include "sstream"
 #include "cassert"
+#include "sstream"
 
-class AstPrinter : public ExprVisitor{
-private:
-    template <class... E>
-    std::string parenthesize(std::string_view name, E... expr)
-    {
-        std::ostringstream builder;
+namespace AstPrinter {
 
-        builder << "(" << name;
-        ((builder << " " << print(expr)), ...);
-        builder << ")";
+std::string visit(Expr *expr);
 
-        return builder.str();
-    }
-public:
-    std::string print(Expr* expr){
-        return vist(expr);
-    }
-     std::string visitBinaryExp(Expr* expr)  {
-        return parenthesize();
-    }
-    std::string visitGroupExp(std::shared_ptr<GroupingExp> expr)  {
-        return parenthesize();
-    }
-    std::string visitUnaryExp(Unary* expr)  {
-        return parenthesize();
-    }
-    std::string visitLiteral(Literal* expr)  {
-        return expr->literal->str();
-    }
+std::string parenthesize(std::string name, Expr *expr1 = 0, Expr *expr2 = 0,
+                         Expr *expr3 = 0, Expr *expr4 = 0) {
+  std::ostringstream builder;
 
-    std::string vist(Expr* expr)
+  builder << "(" << name;
+  if (expr1)
+    builder << " " << visit(expr1);
+  if (expr2)
+    builder << " " << visit(expr2);
+  if (expr3)
+    builder << " " << visit(expr3);
+  if (expr4)
+    builder << " " << visit(expr4);
+  builder << ")";
 
-};
+  return builder.str();
+}
 
+std::string print(Expr *expr) { return visit(expr); }
+std::string visitBinaryExp(Binary *expr) {
+  return parenthesize(expr->op->lexeme, expr->left, expr->right);
+}
+std::string visitGroupExp(Grouping *expr) {
+  return parenthesize("group", expr->expression);
+}
+std::string visitUnaryExp(Unary *expr) {
+  return parenthesize(expr->op->lexeme, expr->right);
+}
+std::string visitLiteral(Literal *expr) { return expr->literal->str(); }
 
-#endif //CRUX_PRETTYPRINTER_H
+std::string visit(Expr *expr) {
+  switch (expr->type) {
+  case ExprType_Unary:
+    visitUnaryExp((Unary *)expr);
+    break;
+  case ExprType_Binary:
+    visitBinaryExp((Binary *)expr);
+    break;
+  case ExprType_Grouping:
+    visitGroupExp((Grouping *)expr);
+    break;
+  case ExprType_Literal:
+    visitLiteral((Literal *)expr);
+    break;
+  }
+  return "<<Invalid type>>";
+}
+}; // namespace AstPrinter
+
+#endif // CRUX_PRETTYPRINTER_H

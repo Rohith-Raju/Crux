@@ -5,16 +5,15 @@
 #ifndef CRUX_RUNTIMEERROR_H
 #define CRUX_RUNTIMEERROR_H
 
-#include <stdexcept>
 #include "Token.h"
+#include <stdexcept>
 
-class RuntimeError: public std::runtime_error {
+class RuntimeError : public std::runtime_error {
 public:
-    const Token& token;
+  const Token &token;
 
-    RuntimeError(const Token& token, std::string_view message)
-            : std::runtime_error{message.data()}, token{token}
-    {}
+  RuntimeError(const Token &token, std::string_view message)
+      : std::runtime_error{message.data()}, token{token} {}
 };
 
-#endif //CRUX_RUNTIMEERROR_H
+#endif // CRUX_RUNTIMEERROR_H

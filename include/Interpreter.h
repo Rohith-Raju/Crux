@@ -5,108 +5,119 @@
 #ifndef CRUX_INTERPRETER_H
 #define CRUX_INTERPRETER_H
 
-#include "Expr.h"
-#include "utls/RuntimeError.h"
 #include "Error.h"
+#include "Expr.h"
+#include "utls/Object.h"
+#include "utls/RuntimeError.h"
 
-class Interpreter : public ExprVisitor{
+class Interpreter {
 private:
-    Object evaluate(std::shared_ptr<Expr> expr){
-       return expr->accept(*this);
-       //todo: should convert the return type to object;
+  Object evaluate(Expr *expr) {
+    switch (expr->type) {
+    case ExprType_Binary:
+      return visitBinaryExp((Binary *)expr);
+    case ExprType_Unary:
+      return visitUnaryExp((Unary *)expr);
+    case ExprType_Literal:
+      return visitLiteral((Literal *)expr);
+    case ExprType_Grouping:
+      return visitGroupExp((Grouping *)expr);
     }
+  }
 
-    bool isTruthy(Object right){
-        if(right.type == nullptr_type) return false;
-        if(right.type == bool_type) return right.bool_literal;
-        return true;
-    }
+  bool isTruthy(Object right) {
+    if (right.type == nullptr_type)
+      return false;
+    if (right.type == bool_type)
+      return right.bool_literal;
+    return true;
+  }
 
-    bool isEqual(Object left, Object right){
-        if(left.type == nullptr_type && right.type == nullptr_type)
-            return true;
-        if(left.type == nullptr_type)
-            return false;
+  bool isEqual(Object left, Object right) {
+    if (left.type == nullptr_type && right.type == nullptr_type)
+      return true;
+    if (left.type == nullptr_type)
+      return false;
 
-        return left.num_literal == right.num_literal;
-    }
+    return left.num_literal == right.num_literal;
+  }
 
-    void checkNumberOperand(Token op, Object right){
-        if(right.type == num_type) return;
-        RuntimeError(op,"Operand must be a number");
-    }
-    void checkNumberOperands(Token op, Object left, Object right){
-        if(left.type == num_type && right.type == num_type) return;
-        throw RuntimeError(op,"Operands must be numbers");
-    }
-
+  void checkNumberOperand(Token *op, Object right) {
+    if (right.type == num_type)
+      return;
+    RuntimeError(*op, "Operand must be a number");
+  }
+  void checkNumberOperands(Token *op, Object left, Object right) {
+    if (left.type == num_type && right.type == num_type)
+      return;
+    throw RuntimeError(*op, "Operands must be numbers");
+  }
 
 public:
-    void interpret(std::shared_ptr<Expr> expression) {
-        try {
-            Object expr = evaluate(expression);
-            std::cout << expr.str();
-        } catch (RuntimeError error) {
-            crux::runtimeError(error);
-        }
+  void interpret(Expr *expression) {
+    try {
+      Object expr = evaluate(expression);
+    } catch (RuntimeError error) {
+      crux::runtimeError(error);
     }
-    std::any visitLiteral(std::shared_ptr<LiteralExp> expr) override {
-        return expr->literal;
-    }
-    std::any visitGroupExp(std::shared_ptr<GroupingExp> expr) override {
-        return evaluate(expr->expr);
-    }
+  }
 
-    std::any visitUnaryExp(std::shared_ptr<UnaryExp> expr) override {
-        Object right = evaluate(expr->right);
-        switch (expr->op.type) {
-            case BANG:
-                return !isTruthy(right);
-            case MINUS:
-                checkNumberOperand(expr->op, right);
-                return - right.num_literal;
-        }
-        return nullptr;
-    }
+  Object visitLiteral(Literal *expr) { return expr->literal; }
 
-    std::any visitBinaryExp(std::shared_ptr<BinaryExp> expr) override{
-        Object left = evaluate(expr->left);
-        Object right = evaluate(expr->right);
-        Token op = expr->op;
-        switch (op.type) {
-            case MINUS:
-                checkNumberOperands(op,left,right);
-                return left.num_literal - right.num_literal;
-            case SLASH:
-                checkNumberOperands(op,left,right);
-                return left.num_literal / right.num_literal;
-            case STAR:
-                checkNumberOperands(op,left,right);
-                return left.num_literal * right.num_literal;
-            case PLUS:
-                if(left.type == num_type && right.type == num_type)
-                    return left.num_literal + right.num_literal;
-                if(left.type == string_type && right.type == string_type)
-                    return left.string_literal + right.string_literal;
-                throw new RuntimeError(op, "Operands must be two strings.");
-            case GREATER:
-                checkNumberOperands(op,left,right);
-                return left.num_literal > right.num_literal;
-            case GREATER_EQUAL:
-                checkNumberOperands(op,left,right);
-                return left.num_literal >= right.num_literal;
-            case LESS:
-                checkNumberOperands(op,left,right);
-                return left.num_literal < right.num_literal;
-            case LESS_EQUAL:
-                checkNumberOperands(op,left,right);
-                return left.num_literal <= right.num_literal;
-            case BANG_EQUAL: return !isEqual(left, right);
-            case EQUAL_EQUAL: return isEqual(left, right);
-        }
-        return nullptr;
+  Object visitGroupExp(Grouping *expr) { return evaluate(expr->expression); }
+
+  Object visitUnaryExp(Unary *expr) {
+    Object right = evaluate(expr->right);
+    switch (expr->op->type) {
+    case BANG:
+      return !isTruthy(right);
+    case MINUS:
+      checkNumberOperand(expr->op, right);
+      return -right.num_literal;
+    default:
+      RuntimeError(*expr->op, "Invalid operator used");
     }
+  }
+
+  Object visitBinaryExp(Binary *expr) {
+    Object left = evaluate(expr->left);
+    Object right = evaluate(expr->right);
+    Token *op = expr->op;
+    switch (op->type) {
+    case MINUS:
+      checkNumberOperands(op, left, right);
+      return left.num_literal - right.num_literal;
+    case SLASH:
+      checkNumberOperands(op, left, right);
+      return left.num_literal / right.num_literal;
+    case STAR:
+      checkNumberOperands(op, left, right);
+      return left.num_literal * right.num_literal;
+    case PLUS:
+      if (left.type == num_type && right.type == num_type)
+        return left.num_literal + right.num_literal;
+      if (left.type == string_type && right.type == string_type)
+        return left.string_literal + right.string_literal;
+      throw new RuntimeError(*op, "Operands must be two strings.");
+    case GREATER:
+      checkNumberOperands(op, left, right);
+      return left.num_literal > right.num_literal;
+    case GREATER_EQUAL:
+      checkNumberOperands(op, left, right);
+      return left.num_literal >= right.num_literal;
+    case LESS:
+      checkNumberOperands(op, left, right);
+      return left.num_literal < right.num_literal;
+    case LESS_EQUAL:
+      checkNumberOperands(op, left, right);
+      return left.num_literal <= right.num_literal;
+    case BANG_EQUAL:
+      return !isEqual(left, right);
+    case EQUAL_EQUAL:
+      return isEqual(left, right);
+    }
+    RuntimeError(*op, "Operator not found");
+  }
 };
 
-
-#endif //CRUX_INTERPRETER_H
+#endif // CRUX_INTERPRETER_H

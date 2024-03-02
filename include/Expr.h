@@ -5,65 +5,61 @@
 #ifndef CRUX_EXPR_H
 #define CRUX_EXPR_H
 
-#include <any>
-#include <memory>
-#include <cassert>
-#include <type_traits>
 #include "Token.h"
 
-enum ExprType{
-    ExprType_Binary,
-    ExprType_Grouping,
-    ExprType_Unary,
-    ExprType_Literal
+enum ExprType {
+  ExprType_Binary,
+  ExprType_Grouping,
+  ExprType_Unary,
+  ExprType_Literal
 };
 
 class Expr {
 public:
-    ExprType type;
+  ExprType type;
 
-    Expr(ExprType type);
+  Expr(ExprType type);
 
-    virtual ~Expr();
+  virtual ~Expr();
 };
 
-class Binary: public Expr {
+class Binary : public Expr {
 public:
-    Expr* left;
-    Token* op;
-    Expr* right;
+  Expr *left;
+  Token *op;
+  Expr *right;
 
-    Binary(Expr *left, Token *op, Expr *right);
+  Binary(Expr *left, Token *op, Expr *right);
 
-    ~Binary();
+  ~Binary();
 };
 
-class Grouping: public Expr {
+class Grouping : public Expr {
 public:
-    Expr* expression;
+  Expr *expression;
 
-    Grouping(Expr *expression);
+  Grouping(Expr *expression);
 
-    ~Grouping();
+  ~Grouping();
 };
 
-class Unary: public Expr{
+class Unary : public Expr {
 public:
-    Token* op;
-    Expr* right;
+  Token *op;
+  Expr *right;
 
-    Unary(Token* op, Expr* right);
+  Unary(Token *op, Expr *right);
 
-    ~Unary();
+  ~Unary();
 };
 
-class Literal: public Expr {
+class Literal : public Expr {
 public:
-    Object* literal;
+  Object *literal;
 
-    Literal(Object* literal);
+  Literal(Object *literal);
 
-    ~Literal();
+  ~Literal();
 };
 
 #endif

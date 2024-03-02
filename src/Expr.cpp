@@ -4,43 +4,31 @@
 
 #include "Expr.h"
 
-Binary::Binary(Expr *left, Token *op, Expr *right):
-        Expr(ExprType_Binary),
-        left(left),
-        op(op),
-        right(right)
-{}
+Expr::Expr(ExprType type) : type(type) {}
 
-Binary::~Binary(){
-    delete left;
-    delete right;
-    delete op;
+Expr::~Expr() {}
+
+Binary::Binary(Expr *left, Token *op, Expr *right)
+    : Expr(ExprType_Binary), left(left), op(op), right(right) {}
+
+Binary::~Binary() {
+  delete left;
+  delete right;
+  delete op;
 }
 
-Grouping::Grouping(Expr *expression):
-        Expr(ExprType_Grouping),
-        expression(expression)
-{}
+Grouping::Grouping(Expr *expression)
+    : Expr(ExprType_Grouping), expression(expression) {}
 
-Grouping::~Grouping(){
-    delete expression;
+Grouping::~Grouping() { delete expression; }
+
+Unary::Unary(Token *op, Expr *right) : Expr(ExprType_Unary), op(op) {}
+
+Unary::~Unary() {
+  delete right;
+  delete op;
 }
 
-Unary::Unary(Token *op, Expr *right):
-        Expr(ExprType_Unary),
-        op(op)
-{}
+Literal::Literal(Object *literal) : Expr(ExprType_Literal), literal(literal) {}
 
-Unary::~Unary(){
-    delete right;
-    delete op;
-}
-
-Literal::Literal(Object* literal):
-        Expr(ExprType_Literal),
-        literal(literal)
-{}
-
-Literal::~Literal(){
-    delete literal;
-}
+Literal::~Literal() { delete literal; }
