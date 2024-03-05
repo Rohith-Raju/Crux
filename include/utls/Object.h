@@ -7,19 +7,22 @@
 
 #include <string>
 
-enum ObjType{
-    nullptr_type, num_type, string_type, bool_type,
+enum ObjType {
+  nullptr_type,
+  num_type,
+  string_type,
+  bool_type,
 };
-class Object{
+class Object {
 public:
-    ObjType type;
-    bool bool_literal;
-    double num_literal;
-    std::string string_literal;
-    Object();
-    Object(bool type);
-    Object(double type);
-    Object(std::string type);
-    std::string str();
+  ObjType type;
+  double num_literal;
+  bool bool_literal;
+  std::string string_literal;
+  Object();
+  Object(bool type);
+  Object(double type);
+  Object(std::string type);
+  std::string str();
 };
-#endif //CRUX_OBJECT_H
+#endif // CRUX_OBJECT_H

@@ -1,17 +1,24 @@
 //
 // Created by Rohith on 1/29/24.
 //
+#include "AstPrinter.h"
+#include "Expr.h"
+#include "Token.h"
+#include "utls/Object.h"
 #include "gtest/gtest.h"
-#include "PrettyPrinter.h"
 
-TEST(AstPrinterCheck, TestExpresson){
-    std::shared_ptr<Expr> expression = std::make_shared<BinaryExp>(
-            std::make_shared<UnaryExp>(
-                    Token{MINUS, "-", {}, 1},
-                    std::make_shared<LiteralExp>(123.)
-            ),
-            Token{STAR, "*", {}, 1},
-            std::make_shared<GroupingExp>(
-                    std::make_shared<LiteralExp>(45.67)));
-    ASSERT_EQ( AstPrinter{}.print(expression),"(* (- 123.000000) (Group 45.670000))");
+TEST(AstPrinterCheck, TestExpresson) {
+
+  Expr *left_exp = new Grouping(new Literal(new Object((double)10)));
+
+  Token *op = new Token(STAR, "*", Object(), 1);
+
+  Expr *right_exp = new Unary(new Token(MINUS, "-", Object(), 1),
+                              new Literal(new Object((double)20)));
+
+  Expr *expression = new Binary(left_exp, op, right_exp);
+  PrettyPrint::print(expression);
+
+  ASSERT_EQ(PrettyPrint::print(expression),
+            "(* (Group 10.000000) (- 20.000000))");
 }

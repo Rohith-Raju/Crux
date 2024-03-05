@@ -5,86 +5,61 @@
 #ifndef CRUX_EXPR_H
 #define CRUX_EXPR_H
 
-#include <any>
-#include <memory>
-#include <cassert>
-#include <type_traits>
 #include "Token.h"
 
-class BinaryExp;
-class GroupingExp;
-class UnaryExp;
-class LiteralExp;
-
-class ExprVisitor{
-public:
-    ~ExprVisitor() = default;
-    virtual std::any visitBinaryExp(std::shared_ptr<BinaryExp> expr) = 0;
-    virtual std::any visitGroupExp(std::shared_ptr<GroupingExp> expr) = 0;
-    virtual std::any visitUnaryExp(std::shared_ptr<UnaryExp> expr) = 0;
-    virtual std::any visitLiteral(std::shared_ptr<LiteralExp> expr) = 0;
-
+enum ExprType {
+  ExprType_Binary,
+  ExprType_Grouping,
+  ExprType_Unary,
+  ExprType_Literal
 };
 
-class Expr{
+class Expr {
 public:
-    virtual std::any accept(ExprVisitor &visitor) = 0;
+  ExprType type;
+
+  Expr(ExprType type);
+
+  virtual ~Expr();
 };
 
-class BinaryExp: public Expr, public std::enable_shared_from_this<BinaryExp>{
+class Binary : public Expr {
 public:
-    std::shared_ptr<Expr> left;
-    Token op;
-    std::shared_ptr<Expr> right;
+  Expr *left;
+  Token *op;
+  Expr *right;
 
-    BinaryExp(std::shared_ptr<Expr> left, Token op, std::shared_ptr<Expr> right):
-        left(std::move(left)),
-        op(std::move(op)),
-        right(std::move(right)){
+  Binary(Expr *left, Token *op, Expr *right);
 
-            assert(this->left != nullptr);
-            assert(this->right != nullptr);
-    }
-    std::any accept(ExprVisitor& visitor) override {
-        return visitor.visitBinaryExp(shared_from_this());
-    }
+  ~Binary();
 };
 
-class GroupingExp: public Expr, public std::enable_shared_from_this<GroupingExp> {
+class Grouping : public Expr {
 public:
-    std::shared_ptr<Expr> expr;
+  Expr *expression;
 
-    GroupingExp(std::shared_ptr<Expr> expr):expr(std::move(expr)){
-        assert(this->expr != nullptr);
-    }
-    std::any accept(ExprVisitor& visitor) override {
-        return visitor.visitGroupExp(shared_from_this());
-    };
+  Grouping(Expr *expression);
 
+  ~Grouping();
 };
 
-class UnaryExp : public Expr, public std::enable_shared_from_this<UnaryExp> {
+class Unary : public Expr {
 public:
-    Token op;
-    std::shared_ptr<Expr> right;
+  Token *op;
+  Expr *right;
 
-    UnaryExp(Token op, std::shared_ptr<Expr> right):op(std::move(op)),right(std::move(right)){
-        assert(this->right != nullptr);
-    }
+  Unary(Token *op, Expr *right);
 
-    std::any accept(ExprVisitor& visitor) override {
-        return visitor.visitUnaryExp(shared_from_this());
-    }
+  ~Unary();
 };
 
-class LiteralExp : public Expr, public std::enable_shared_from_this<LiteralExp> {
+class Literal : public Expr {
 public:
-    Object literal;
-    LiteralExp(Object literal):literal(std::move(literal)){}
-    std::any accept(ExprVisitor& visitor) override {
-        return visitor.visitLiteral(shared_from_this());
-    }
+  Object *literal;
+
+  Literal(Object *literal);
+
+  ~Literal();
 };
 
-
-#endif //CRUX_EXPR_H
+#endif
