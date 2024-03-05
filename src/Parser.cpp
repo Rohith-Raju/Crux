@@ -40,7 +40,7 @@ Expr *Parser::term() {
   while (match(MINUS, PLUS)) {
     Token *op = new Token(previous());
     Expr *right = factor();
-    right = new Binary(expr, op, right);
+    expr = new Binary(expr, op, right);
   }
   return expr;
 }

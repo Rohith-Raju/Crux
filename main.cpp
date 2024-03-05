@@ -1,5 +1,6 @@
+#include "AstPrinter.h"
+#include "Error.h"
 #include "Interpreter.h"
-#include "PrettyPrinter.h"
 #include "Scanner.h"
 #include <Parser.h>
 #include <iostream>

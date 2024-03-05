@@ -3,6 +3,8 @@ set(Sources Error.cpp
         Parser.cpp
         utls/Object.cpp
         Expr.cpp
+		AstPrinter.cpp
+		
 )
 
 

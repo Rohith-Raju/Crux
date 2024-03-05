@@ -22,7 +22,8 @@ Grouping::Grouping(Expr *expression)
 
 Grouping::~Grouping() { delete expression; }
 
-Unary::Unary(Token *op, Expr *right) : Expr(ExprType_Unary), op(op) {}
+Unary::Unary(Token *op, Expr *right)
+    : Expr(ExprType_Unary), op(op), right(right) {}
 
 Unary::~Unary() {
   delete right;
