@@ -11,7 +11,8 @@ enum ExprType {
   ExprType_Binary,
   ExprType_Grouping,
   ExprType_Unary,
-  ExprType_Literal
+  ExprType_Literal,
+  ExprType_Ternary
 };
 
 class Expr {
@@ -51,6 +52,19 @@ public:
   Unary(Token *op, Expr *right);
 
   ~Unary();
+};
+
+class Ternary : public Expr {
+public:
+  Expr *condition;
+  Token *op1;
+  Expr *expression1;
+  Token *op2;
+  Expr *expression2;
+
+  Ternary(Expr *condt, Token *op1, Expr *expr1, Token *op2, Expr *expr2);
+
+  ~Ternary();
 };
 
 class Literal : public Expr {

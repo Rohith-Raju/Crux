@@ -15,6 +15,8 @@ std::string print(Expr *expr);
 
 std::string visitBinaryExp(Binary *expr);
 
+std::string visitTernary(Ternary *expr);
+
 std::string visitGroupExp(Grouping *expr);
 
 std::string visitUnaryExp(Unary *expr);

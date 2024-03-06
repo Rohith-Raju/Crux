@@ -3,6 +3,7 @@
 //
 
 #include "Scanner.h"
+#include "Token.h"
 
 bool Scanner::isAtEnd() { return current >= source.length(); }
 
@@ -51,6 +52,12 @@ void Scanner::scanToken() {
     break;
   case '*':
     addToken(STAR);
+    break;
+  case '?':
+    addToken(QUESTON_MARK);
+    break;
+  case ':':
+    addToken(COLON);
     break;
   case '!':
     addToken(match('=') ? BANG_EQUAL : BANG);

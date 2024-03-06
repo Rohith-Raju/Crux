@@ -1,7 +1,6 @@
 //
-// Created by Rohith on 2/9/24.
-//
 #include "Parser.h"
+#include "Error.h"
 #include "Expr.h"
 #include "Token.h"
 
@@ -14,6 +13,24 @@ Expr *Parser::parse() {
 }
 
 Expr *Parser::expression() { return equality(); }
+
+Expr *Parser::ternary() {
+  Expr *expr = equality();
+  if (match(QUESTON_MARK)) {
+    Token *questionMark = new Token(previous());
+    Expr *expr1 = equality();
+    if (match(COLON)) {
+      Token *colon = new Token(previous());
+      Expr *expr2 = equality();
+      expr = new Ternary(expr, questionMark, expr1, colon, expr2);
+    } else {
+      error(peek(), "Expected:");
+      delete questionMark;
+      delete expr1;
+    }
+  }
+  return expr;
+}
 
 Expr *Parser::equality() {
   Expr *expr = comparison();
@@ -30,7 +47,11 @@ Expr *Parser::comparison() {
   while (match(GREATER, GREATER_EQUAL, LESS_EQUAL, LESS)) {
     Token *op = new Token(previous());
     Expr *right = term();
-    expr = new Binary(expr, op, right);
+    if (peek_next().type = QUESTON_MARK) {
+      expr = new Ternary()
+    } else {
+      expr = new Binary(expr, op, right);
+    }
   }
   return expr;
 }
@@ -92,7 +113,6 @@ Token Parser::consume(TokenType type, std::string message) {
 }
 
 template <class... T> bool Parser::match(T... type) {
-  assert((... && std::is_same_v<T, TokenType>));
   if ((... || check(type))) {
     advance();
     return true;
@@ -115,6 +135,8 @@ Token Parser::advance() {
 Token Parser::previous() { return tokens[current - 1]; }
 
 Token Parser::peek() { return tokens[current]; }
+
+Token Parser::peek_next() { return tokens[current + 1]; }
 
 bool Parser::isAtEnd() { return peek().type == ENDOFFILE; }
 
