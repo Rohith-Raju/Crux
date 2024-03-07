@@ -12,7 +12,7 @@ Expr *Parser::parse() {
   }
 }
 
-Expr *Parser::expression() { return equality(); }
+Expr *Parser::expression() { return ternary(); }
 
 Expr *Parser::ternary() {
   Expr *expr = equality();
@@ -47,11 +47,7 @@ Expr *Parser::comparison() {
   while (match(GREATER, GREATER_EQUAL, LESS_EQUAL, LESS)) {
     Token *op = new Token(previous());
     Expr *right = term();
-    if (peek_next().type = QUESTON_MARK) {
-      expr = new Ternary()
-    } else {
-      expr = new Binary(expr, op, right);
-    }
+    expr = new Binary(expr, op, right);
   }
   return expr;
 }

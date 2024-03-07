@@ -1,0 +1,25 @@
+name: Build
+on:
+  push:
+jobs:
+  build-project:
+    name: Build Project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v4.1.1
+        with:
+          submodules: true 
+
+      - name: Configure Project
+        uses: threeal/cmake-action@v1.3.0
+        with: 
+          c-compiler: gcc
+          cxx-compiler: g++
+          cxx-flags: "--std=c++17"
+
+      - name: Build Project
+        run: cmake --build build
+
+      - name: Run-Tests
+        run: ./build/test/run_crux_test

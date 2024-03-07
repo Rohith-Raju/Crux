@@ -52,5 +52,6 @@ TEST(ParserCheck, TestParserTernary) {
   std::vector<Token> tokens = scan.scanTokens();
   Parser p(tokens);
   Expr *expression = p.parse();
-  ASSERT_EQ(PrettyPrint::print(expression), "");
+  ASSERT_EQ(PrettyPrint::print(expression),
+            "(?: (> 3.000000 1.000000) true false)");
 }

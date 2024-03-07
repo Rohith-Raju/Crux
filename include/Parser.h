@@ -7,6 +7,7 @@
 
 #include "Expr.h"
 #include "Token.h"
+#include <stdexcept>
 #include <vector>
 
 class Parser {

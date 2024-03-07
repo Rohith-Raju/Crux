@@ -4,6 +4,7 @@
 #include "Scanner.h"
 #include <Parser.h>
 #include <iostream>
+#include <memory>
 
 void runCode(std::string source);
 

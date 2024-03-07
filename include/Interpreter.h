@@ -23,6 +23,7 @@ private:
     case ExprType_Grouping:
       return visitGroupExp((Grouping *)expr);
     }
+    return Object();
   }
 
   bool isTruthy(Object right) {
@@ -54,15 +55,16 @@ private:
   }
 
 public:
-  void interpret(Expr *expression) {
+  std ::string interpret(Expr *expression) {
     try {
       Object expr = evaluate(expression);
+      return expr.str();
     } catch (RuntimeError error) {
       crux::runtimeError(error);
     }
   }
 
-  Object visitLiteral(Literal *expr) { return expr->literal; }
+  Object visitLiteral(Literal *expr) { return *expr->literal; }
 
   Object visitGroupExp(Grouping *expr) { return evaluate(expr->expression); }
 
@@ -77,6 +79,7 @@ public:
     default:
       RuntimeError(*expr->op, "Invalid operator used");
     }
+    return Object();
   }
 
   Object visitBinaryExp(Binary *expr) {
@@ -117,6 +120,7 @@ public:
       return isEqual(left, right);
     }
     RuntimeError(*op, "Operator not found");
+    return Object();
   }
 };
 
