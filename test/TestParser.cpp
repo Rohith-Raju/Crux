@@ -5,6 +5,7 @@
 #include "Parser.h"
 #include "Scanner.h"
 #include "gtest/gtest.h"
+#include <vector>
 
 TEST(ParserCheck, TestParserBasic) {
   std::string test = "10 + 20";
@@ -43,4 +44,13 @@ TEST(ParserCheck, TestParserComplexUnary) {
   Expr *expression = p.parse();
   ASSERT_EQ(PrettyPrint::print(expression),
             "(+ (+ (! true) (Group (- 30.000000 false))) 40.000000)");
+}
+
+TEST(ParserCheck, TestParserTernary) {
+  std::string test = "3 > 1 ? true : false";
+  Scanner scan(test);
+  std::vector<Token> tokens = scan.scanTokens();
+  Parser p(tokens);
+  Expr *expression = p.parse();
+  ASSERT_EQ(PrettyPrint::print(expression), "");
 }

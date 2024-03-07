@@ -5,12 +5,8 @@
 #ifndef CRUX_PARSER_H
 #define CRUX_PARSER_H
 
-#include "Error.h"
 #include "Expr.h"
 #include "Token.h"
-#include <cassert>
-#include <memory>
-#include <utility> //std::move()
 #include <vector>
 
 class Parser {
@@ -21,6 +17,7 @@ private:
   std::vector<Token> tokens;
   int current = 0;
   Expr *expression();
+  Expr *ternary();
   Expr *comparison();
   Expr *term();
   Expr *factor();
@@ -33,6 +30,7 @@ private:
   Token advance();
   bool isAtEnd();
   Token peek();
+  Token peek_next();
   Token previous();
   Token consume(TokenType type, std::string message);
   template <class... T> bool match(T... type);

@@ -18,9 +18,11 @@ enum TokenType {
   DOT,
   MINUS,
   PLUS,
+  COLON,
   SEMICOLON,
   SLASH,
   STAR,
+  QUESTON_MARK,
 
   // One or two character tokens.
   BANG,

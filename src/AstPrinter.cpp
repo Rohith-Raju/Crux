@@ -29,12 +29,19 @@ std::string PrettyPrint::print(Expr *expr) { return visit(expr); }
 std::string PrettyPrint::visitBinaryExp(Binary *expr) {
   return parenthesize(expr->op->lexeme, expr->left, expr->right);
 }
+
+std::string PrettyPrint::visitTernary(Ternary *expr) {
+  return parenthesize(expr->op1->lexeme + expr->op2->lexeme, expr->condition,
+                      expr->expression1, expr->expression2);
+}
+
 std::string PrettyPrint::visitGroupExp(Grouping *expr) {
   return parenthesize("Group", expr->expression);
 }
 std::string PrettyPrint::visitUnaryExp(Unary *expr) {
   return parenthesize(expr->op->lexeme, expr->right);
 }
+
 std::string PrettyPrint::visitLiteral(Literal *expr) {
   std::string digits = expr->literal->str();
   return digits;
@@ -44,6 +51,8 @@ std::string PrettyPrint::visit(Expr *expr) {
   switch (expr->type) {
   case ExprType_Unary:
     return visitUnaryExp((Unary *)expr);
+  case ExprType_Ternary:
+    return visitTernary((Ternary *)expr);
   case ExprType_Binary:
     return visitBinaryExp((Binary *)expr);
   case ExprType_Grouping:
