@@ -9,6 +9,7 @@
 #include "Expr.h"
 #include "utls/Object.h"
 #include "utls/RuntimeError.h"
+#include <string>
 
 class Interpreter {
 private:
@@ -22,6 +23,8 @@ private:
       return visitLiteral((Literal *)expr);
     case ExprType_Grouping:
       return visitGroupExp((Grouping *)expr);
+    case ExprType_Ternary:
+      return visitTernaryExp((Ternary *)expr);
     }
     return Object();
   }
@@ -48,10 +51,20 @@ private:
       return;
     RuntimeError(*op, "Operand must be a number");
   }
-  void checkNumberOperands(Token *op, Object left, Object right) {
+  bool checkIfSameTypes(Object left, Object right) {
     if (left.type == num_type && right.type == num_type)
-      return;
-    throw RuntimeError(*op, "Operands must be numbers");
+      return true;
+    else
+      return false;
+  }
+
+  bool checkCompatibility(Token *op, Object left, Object right) {
+    if ((left.type == string_type && right.type == num_type) ||
+        right.type == num_type && left.type == string_type) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
 public:
@@ -88,31 +101,38 @@ public:
     Token *op = expr->op;
     switch (op->type) {
     case MINUS:
-      checkNumberOperands(op, left, right);
+      checkIfSameTypes(left, right);
       return left.num_literal - right.num_literal;
     case SLASH:
-      checkNumberOperands(op, left, right);
+      checkIfSameTypes(left, right);
       return left.num_literal / right.num_literal;
     case STAR:
-      checkNumberOperands(op, left, right);
+      checkIfSameTypes(left, right);
       return left.num_literal * right.num_literal;
     case PLUS:
-      if (left.type == num_type && right.type == num_type)
-        return left.num_literal + right.num_literal;
-      if (left.type == string_type && right.type == string_type)
-        return left.string_literal + right.string_literal;
-      throw new RuntimeError(*op, "Operands must be two strings.");
+      if (checkIfSameTypes(left, right)) {
+        if (left.type == num_type && right.type == num_type)
+          return left.num_literal + right.num_literal;
+        if (left.type == string_type && right.type == string_type)
+          return left.string_literal + right.string_literal;
+      } else if (checkCompatibility(op, left, right)) {
+        if (left.type == string_type && right.type == num_type)
+          return left.string_literal + std::to_string(right.num_literal);
+        else
+          return right.string_literal + std::to_string(left.num_literal);
+      }
+      throw new RuntimeError(*op, "Error: Cannot evaluate expression");
     case GREATER:
-      checkNumberOperands(op, left, right);
+      checkIfSameTypes(left, right);
       return left.num_literal > right.num_literal;
     case GREATER_EQUAL:
-      checkNumberOperands(op, left, right);
+      checkIfSameTypes(left, right);
       return left.num_literal >= right.num_literal;
     case LESS:
-      checkNumberOperands(op, left, right);
+      checkIfSameTypes(left, right);
       return left.num_literal < right.num_literal;
     case LESS_EQUAL:
-      checkNumberOperands(op, left, right);
+      checkIfSameTypes(left, right);
       return left.num_literal <= right.num_literal;
     case BANG_EQUAL:
       return !isEqual(left, right);
@@ -120,6 +140,18 @@ public:
       return isEqual(left, right);
     }
     RuntimeError(*op, "Operator not found");
+  }
+
+  Object visitTernaryExp(Ternary *expr) {
+    Object condition = evaluate(expr->condition);
+    if (condition.type == bool_type) {
+      if (condition.bool_literal)
+        return evaluate(expr->expression1);
+      else
+        return evaluate(expr->expression2);
+    } else {
+      RuntimeError(*expr->op1, "Ternary Expression couldn't be evaluated");
+    }
     return Object();
   }
 };
