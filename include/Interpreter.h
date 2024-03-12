@@ -118,8 +118,8 @@ public:
       } else if (checkCompatibility(op, left, right)) {
         if (left.type == string_type && right.type == num_type)
           return left.string_literal + std::to_string(right.num_literal);
-        else
-          return right.string_literal + std::to_string(left.num_literal);
+        else if (left.type == num_type && right.type == string_type)
+          return std::to_string(left.num_literal) + right.string_literal;
       }
       throw new RuntimeError(*op, "Error: Cannot evaluate expression");
     case GREATER:

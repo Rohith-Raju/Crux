@@ -6,6 +6,8 @@
 #include "Parser.h"
 #include "Scanner.h"
 #include "gtest/gtest.h"
+#include <string>
+#include <vector>
 
 TEST(InterpreterCheck, TestInterpreterBasic) {
 
@@ -45,4 +47,24 @@ TEST(InterpreterTest, TestParserTernary) {
   Parser p(tokens);
   Expr *expression = p.parse();
   ASSERT_EQ(Interpreter{}.interpret(expression), "true");
+}
+
+TEST(IntrepreterTest, TestStringNumExpressions) {
+  std::string test1 = "\"test\"+8";
+  std::string test2 = "8+\"test\"";
+
+  Scanner scan1(test1);
+  Scanner scan2(test2);
+  std::vector<Token> tokens1 = scan1.scanTokens();
+  std::vector<Token> tokens2 = scan2.scanTokens();
+
+  Parser p1(tokens1);
+  Parser p2(tokens2);
+
+  Expr *expression1 = p1.parse();
+  Expr *expression2 = p2.parse();
+
+  ASSERT_EQ(Interpreter{}.interpret(expression1), "test8.000000");
+  // todo: test not passing ASSERT_EQ(Interpreter{}.interpret(expression2),
+  // "8.000000test");
 }

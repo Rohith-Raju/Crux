@@ -8,6 +8,7 @@
 #include "Token.h"
 #include <Error.h>
 #include <map>
+#include <string>
 #include <vector>
 
 namespace tkn {
@@ -33,6 +34,7 @@ public:
   std::vector<Token> scanTokens();
   char peek();
   void string();
+  std::string subString(int &start, int &end, std::string &str);
   void number();
   char advance();
   void scanToken();

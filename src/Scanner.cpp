@@ -6,7 +6,6 @@
 #include "Token.h"
 
 bool Scanner::isAtEnd() { return current >= source.length(); }
-
 char Scanner::advance() { return source[current++]; }
 
 std::vector<Token> Scanner::scanTokens() {
@@ -102,17 +101,28 @@ void Scanner::scanToken() {
   }
 }
 
+std::string Scanner::subString(int &start, int &end, std::string &str) {
+  std::string res = "";
+  for (int i = start + 1; i <= end - 1; i++) {
+    if (str[i] == '"')
+      break;
+    res += str[i];
+  }
+  return res;
+}
+
 void Scanner::string() {
   while (peek() != '"' && !isAtEnd()) {
     if (peek() == '\n')
       line++;
     advance();
   }
+
   if (isAtEnd()) {
     crux::error(line, "Unterminated string");
   }
   advance();
-  std::string value = source.substr(start + 1, current - 1);
+  std::string value = subString(start, current, source);
   addString(value);
 }
 

@@ -89,7 +89,11 @@ Expr *Parser::primary() {
   if (match(NIL))
     return new Literal(new Object());
 
-  if (match(NUMBER, STRING)) {
+  if (match(NUMBER)) {
+    return new Literal(new Object(previous().literal));
+  }
+
+  if (match(STRING)) {
     return new Literal(new Object(previous().literal));
   }
 
