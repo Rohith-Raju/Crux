@@ -65,6 +65,5 @@ TEST(IntrepreterTest, TestStringNumExpressions) {
   Expr *expression2 = p2.parse();
 
   ASSERT_EQ(Interpreter{}.interpret(expression1), "test8.000000");
-  // todo: test not passing ASSERT_EQ(Interpreter{}.interpret(expression2),
-  // "8.000000test");
+  ASSERT_EQ(Interpreter{}.interpret(expression2), "8.000000test");
 }

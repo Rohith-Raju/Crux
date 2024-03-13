@@ -60,7 +60,7 @@ private:
 
   bool checkCompatibility(Token *op, Object left, Object right) {
     if ((left.type == string_type && right.type == num_type) ||
-        right.type == num_type && left.type == string_type) {
+        left.type == num_type && right.type == string_type) {
       return true;
     } else {
       return false;
