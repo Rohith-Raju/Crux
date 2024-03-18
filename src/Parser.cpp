@@ -2,15 +2,32 @@
 #include "Parser.h"
 #include "Error.h"
 #include "Expr.h"
+#include "Statement.h"
 #include "Token.h"
+#include <vector>
 
-Expr *Parser::parse() {
-  try {
-    return expression();
-  } catch (ParseError error) {
-    return nullptr;
+std::vector<Statement *> Parser::parse() {
+  std::vector<Statement *> statements;
+  while (!isAtEnd()) {
+    statements.push_back(statement());
   }
+  return statements;
 }
+
+Statement *Parser::statement() {
+  if (match(PRINT))
+    return printStatement();
+  return expressionStatement();
+}
+
+Statement *Parser::printStatement() {
+  Expr *expr = expression();
+  // if(consume(SEMICOLON, "Expected ; at the end of the statement"))
+  // Todo: continue from here
+  return new Print(expr);
+}
+
+Statement *Parser::expressionStatement() {}
 
 Expr *Parser::expression() { return ternary(); }
 

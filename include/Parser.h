@@ -7,6 +7,7 @@
 
 #include "Expr.h"
 #include "Token.h"
+#include <Statement.h>
 #include <stdexcept>
 #include <vector>
 
@@ -25,6 +26,11 @@ private:
   Expr *unary();
   Expr *primary();
 
+  // Statement helper functions
+  Statement *statement();
+  Statement *printStatement();
+  Statement *expressionStatement();
+
   // helper functions
   Expr *equality();
   bool check(TokenType type);
@@ -40,7 +46,7 @@ private:
 
 public:
   Parser(const std::vector<Token> &tokens) : tokens{tokens} {};
-  Expr *parse();
+  std::vector<Statement *> parse();
 };
 
 #endif // CRUX_PARSER_H

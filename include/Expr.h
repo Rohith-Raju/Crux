@@ -12,12 +12,14 @@ enum ExprType {
   ExprType_Grouping,
   ExprType_Unary,
   ExprType_Literal,
-  ExprType_Ternary
+  ExprType_Ternary,
+  ExprType_Statement,
+  ExprType_Print
 };
 
 class Expr {
 public:
-  ExprType type;
+  CRUX_STATEMENT_HExprType type;
 
   Expr(ExprType type);
 

@@ -1,0 +1,33 @@
+//
+// Created by Rohith on 18/03/24
+//
+//
+#ifndef CRUX_STATEMENT_H
+#define CRUX_STATEMENT_H
+
+#include "Expr.h"
+
+enum Statement_type {
+  StmntExpr_type,
+  StmntPrint_type,
+};
+
+class Statement {
+public:
+  Statement_type type;
+  Statement(Statement_type type);
+};
+
+class Print : public Statement {
+public:
+  Expr *expression;
+  Print(Expr *expression);
+};
+
+class Expression : public Statement {
+public:
+  Expr *expression;
+  Expression(Expr *expression);
+};
+
+#endif
