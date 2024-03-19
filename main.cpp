@@ -4,6 +4,7 @@
 #include <Parser.h>
 #include <iostream>
 #include <memory>
+#include <vector>
 
 void runCode(std::string source);
 
@@ -28,7 +29,7 @@ void runCode(std::string source) {
   Scanner scanner(source);
   std::vector<Token> tokens = scanner.scanTokens();
   Parser parser(tokens);
-  Expr *expression = parser.parse();
+  std::vector<Statement *> expression = parser.parse();
   std::unique_ptr<Interpreter> interpreter = std::make_unique<Interpreter>();
   interpreter->interpret(expression);
 }

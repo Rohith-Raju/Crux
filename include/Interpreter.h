@@ -7,12 +7,23 @@
 
 #include "Error.h"
 #include "Expr.h"
+#include "Statement.h"
 #include "utls/Object.h"
 #include "utls/RuntimeError.h"
+#include <iostream>
 #include <string>
-
+#include <vector>
 class Interpreter {
 private:
+  void excecute(Statement *stmnt) {
+    switch (stmnt->type) {
+    case StmntPrint_type:
+      return visitPrintStmnt((Print *)stmnt);
+    case StmntExpr_type:
+      return visitExprStmnt((Expression *)stmnt);
+    }
+  }
+
   Object evaluate(Expr *expr) {
     switch (expr->type) {
     case ExprType_Binary:
@@ -68,14 +79,23 @@ private:
   }
 
 public:
-  std ::string interpret(Expr *expression) {
+  void interpret(std::vector<Statement *> &statements) {
     try {
-      Object expr = evaluate(expression);
-      return expr.str();
+      for (Statement *stmt : statements) {
+        excecute(stmt);
+      }
     } catch (RuntimeError error) {
       crux::runtimeError(error);
     }
   }
+
+  void visitPrintStmnt(Print *expr) {
+    Object value = evaluate(expr->expression);
+    std::cout << value.str() << "\n";
+    return;
+  }
+
+  void visitExprStmnt(Expression *expr) { evaluate(expr->expression); }
 
   Object visitLiteral(Literal *expr) { return *expr->literal; }
 

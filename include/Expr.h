@@ -13,13 +13,11 @@ enum ExprType {
   ExprType_Unary,
   ExprType_Literal,
   ExprType_Ternary,
-  ExprType_Statement,
-  ExprType_Print
 };
 
 class Expr {
 public:
-  CRUX_STATEMENT_HExprType type;
+  ExprType type;
 
   Expr(ExprType type);
 

@@ -22,12 +22,15 @@ Statement *Parser::statement() {
 
 Statement *Parser::printStatement() {
   Expr *expr = expression();
-  // if(consume(SEMICOLON, "Expected ; at the end of the statement"))
-  // Todo: continue from here
+  consume(SEMICOLON, "Expected ; at the end of the statement");
   return new Print(expr);
 }
 
-Statement *Parser::expressionStatement() {}
+Statement *Parser::expressionStatement() {
+  Expr *expr = expression();
+  consume(SEMICOLON, "Expected ; at the end of the statement");
+  return new Expression(expr);
+}
 
 Expr *Parser::expression() { return ternary(); }
 
