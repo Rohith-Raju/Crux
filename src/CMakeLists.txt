@@ -4,6 +4,7 @@ set(Sources Error.cpp
         utls/Object.cpp
         Expr.cpp
 				AstPrinter.cpp
+				Interpreter.cpp
 				Statement.cpp
 )
 

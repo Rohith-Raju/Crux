@@ -7,10 +7,7 @@
 
 #include "Expr.h"
 
-enum Statement_type {
-  StmntExpr_type,
-  StmntPrint_type,
-};
+enum Statement_type { StmntExpr_type, StmntPrint_type, StmntVar_type };
 
 class Statement {
 public:
@@ -28,6 +25,13 @@ class Expression : public Statement {
 public:
   Expr *expression;
   Expression(Expr *expression);
+};
+
+class Var : public Statement {
+public:
+  Token *name;
+  Expr *expression;
+  Var(Token *name, Expr *expression);
 };
 
 #endif

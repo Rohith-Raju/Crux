@@ -31,6 +31,10 @@ private:
   Statement *printStatement();
   Statement *expressionStatement();
 
+  // Variable stuff
+  Statement *declaration();
+  Statement *varDeclaration();
+
   // helper functions
   Expr *equality();
   bool check(TokenType type);

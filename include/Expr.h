@@ -76,4 +76,9 @@ public:
   ~Literal();
 };
 
+class Variable : public Expr {
+public:
+  Token *name;
+};
+
 #endif
