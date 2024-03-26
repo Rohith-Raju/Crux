@@ -1,6 +1,4 @@
 //
-// Created by Rohith on 2/9/24.
-//
 
 #ifndef CRUX_PARSER_H
 #define CRUX_PARSER_H

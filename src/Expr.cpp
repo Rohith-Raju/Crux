@@ -46,3 +46,7 @@ Ternary::~Ternary() {
 Literal::Literal(Object *literal) : Expr(ExprType_Literal), literal(literal) {}
 
 Literal::~Literal() { delete literal; }
+
+Variable::Variable(Token *name) : Expr(ExprType_Variable), name(name) {}
+
+Variable::~Variable() { delete name; }

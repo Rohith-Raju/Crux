@@ -1,17 +1,43 @@
-//Object 
+// Object
 #include "Parser.h"
 #include "Error.h"
 #include "Expr.h"
 #include "Statement.h"
 #include "Token.h"
+#include <algorithm>
 #include <vector>
 
 std::vector<Statement *> Parser::parse() {
   std::vector<Statement *> statements;
   while (!isAtEnd()) {
+    // TODO: Change this to delclaration at the end.
     statements.push_back(statement());
   }
   return statements;
+}
+
+Statement *Parser::declaration() {
+  try {
+    if (match(VAR))
+      return varDeclaration();
+  } catch (ParseError error) {
+    synchronize();
+    return nullptr;
+  }
+  return nullptr;
+}
+
+Statement *Parser::varDeclaration() {
+  Token *name = new Token(consume(IDENTIFIER, "variable name required"));
+
+  Expr *initializer = nullptr;
+
+  if (match(EQUAL)) {
+    initializer = expression();
+  }
+
+  consume(SEMICOLON, "Expected ; after the variable declaration");
+  return new Var(name, initializer);
 }
 
 Statement *Parser::statement() {
@@ -104,8 +130,10 @@ Expr *Parser::unary() {
 Expr *Parser::primary() {
   if (match(FALSE))
     return new Literal(new Object(false));
+
   if (match(TRUE))
     return new Literal(new Object(true));
+
   if (match(NIL))
     return new Literal(new Object());
 
@@ -115,6 +143,10 @@ Expr *Parser::primary() {
 
   if (match(STRING)) {
     return new Literal(new Object(previous().literal));
+  }
+
+  if (match(IDENTIFIER)) {
+    return new Variable(new Token(previous()));
   }
 
   if (match(LEFT_PAREN)) {
