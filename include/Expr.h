@@ -13,7 +13,8 @@ enum ExprType {
   ExprType_Unary,
   ExprType_Literal,
   ExprType_Ternary,
-  ExprType_Variable
+  ExprType_Variable,
+  ExprType_Assignment
 };
 
 class Expr {
@@ -84,6 +85,17 @@ public:
   Variable(Token *name);
 
   ~Variable();
+};
+
+class Assignment : public Expr {
+public:
+  Token *name;
+
+  Expr *value;
+
+  Assignment(Token *name, Expr *value);
+
+  ~Assignment();
 };
 
 #endif

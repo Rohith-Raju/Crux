@@ -8,11 +8,15 @@
 #include "Expr.h"
 #include "Statement.h"
 #include "Token.h"
+#include "env/Env.h"
 #include "utls/Object.h"
 #include <vector>
+
 class Interpreter {
 private:
-  Object excecute(Statement *stmnt);
+  Environment *environment = new Environment();
+
+  void excecute(Statement *stmnt);
 
   Object evaluate(Expr *expr);
 
@@ -27,11 +31,15 @@ private:
   bool checkCompatibility(Token *op, Object left, Object right);
 
 public:
-  std::string interpret(std::vector<Statement *> &statements);
+  void interpret(std::vector<Statement *> &statements);
 
   void visitPrintStmnt(Print *expr);
 
-  Object visitExprStmnt(Expression *expr);
+  void visitExprStmnt(Expression *expr);
+
+  void visitVarStmnt(Var *expr);
+
+  Object visitAssignment(Assignment *expr);
 
   Object visitLiteral(Literal *expr);
 
@@ -42,6 +50,8 @@ public:
   Object visitBinaryExp(Binary *expr);
 
   Object visitTernaryExp(Ternary *expr);
+
+  Object visitVariableExp(Variable *expr);
 };
 
 #endif // CRUX_INTERPRETER_H

@@ -6,6 +6,7 @@ set(Sources Error.cpp
 				AstPrinter.cpp
 				Interpreter.cpp
 				Statement.cpp
+				env/env.cpp
 )
 
 

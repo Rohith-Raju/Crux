@@ -19,12 +19,14 @@ class Print : public Statement {
 public:
   Expr *expression;
   Print(Expr *expression);
+  ~Print();
 };
 
 class Expression : public Statement {
 public:
   Expr *expression;
   Expression(Expr *expression);
+  ~Expression();
 };
 
 class Var : public Statement {
@@ -32,6 +34,7 @@ public:
   Token *name;
   Expr *expression;
   Var(Token *name, Expr *expression);
+  ~Var();
 };
 
 #endif

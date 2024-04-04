@@ -4,27 +4,30 @@
 #include "Expr.h"
 #include "Statement.h"
 #include "Token.h"
-#include <algorithm>
 #include <vector>
 
 std::vector<Statement *> Parser::parse() {
   std::vector<Statement *> statements;
   while (!isAtEnd()) {
-    // TODO: Change this to delclaration at the end.
-    statements.push_back(statement());
+    Statement *stmt = declaration();
+    if (crux::hasError) {
+      synchronize();
+      if (stmt) {
+        delete stmt;
+      }
+      stmt = nullptr;
+      break;
+    } else {
+      statements.push_back(stmt);
+    }
   }
   return statements;
 }
 
 Statement *Parser::declaration() {
-  try {
-    if (match(VAR))
-      return varDeclaration();
-  } catch (ParseError error) {
-    synchronize();
-    return nullptr;
-  }
-  return nullptr;
+  if (match(VAR))
+    return varDeclaration();
+  return statement();
 }
 
 Statement *Parser::varDeclaration() {
@@ -58,7 +61,23 @@ Statement *Parser::expressionStatement() {
   return new Expression(expr);
 }
 
-Expr *Parser::expression() { return ternary(); }
+Expr *Parser::expression() { return assignment(); }
+
+Expr *Parser::assignment() {
+  Expr *expr = ternary();
+
+  if (match(EQUAL)) {
+    Token equals = previous();
+    Expr *value = assignment();
+    if (expr->type == ExprType_Variable) {
+      Variable *var = (Variable *)expr;
+      Token *name = var->name;
+      return new Assignment(name, value);
+    }
+    error(peek(), "Invalid assignment target.");
+  }
+  return expr;
+}
 
 Expr *Parser::ternary() {
   Expr *expr = equality();

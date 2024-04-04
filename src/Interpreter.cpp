@@ -4,19 +4,24 @@
 
 #include "Interpreter.h"
 #include "Error.h"
+#include "Expr.h"
 #include "utls/Object.h"
 #include "utls/RuntimeError.h"
 #include <iostream>
 #include <string>
 #include <vector>
 
-Object Interpreter::excecute(Statement *stmnt) {
+void Interpreter::excecute(Statement *stmnt) {
   switch (stmnt->type) {
   case StmntPrint_type:
     visitPrintStmnt((Print *)stmnt);
-    return Object();
+    break;
   case StmntExpr_type:
-    return visitExprStmnt((Expression *)stmnt);
+    visitExprStmnt((Expression *)stmnt);
+    break;
+  case StmntVar_type:
+    visitVarStmnt((Var *)stmnt);
+    break;
   }
 }
 
@@ -32,6 +37,10 @@ Object Interpreter::evaluate(Expr *expr) {
     return visitGroupExp((Grouping *)expr);
   case ExprType_Ternary:
     return visitTernaryExp((Ternary *)expr);
+  case ExprType_Variable:
+    return visitVariableExp((Variable *)expr);
+  case ExprType_Assignment:
+    return visitAssignment((Assignment *)expr);
   }
   return Object();
 }
@@ -75,27 +84,44 @@ bool Interpreter::checkCompatibility(Token *op, Object left, Object right) {
   }
 }
 
-std::string Interpreter::interpret(std::vector<Statement *> &statements) {
+void Interpreter::interpret(std::vector<Statement *> &statements) {
   try {
-    for (Statement *stmt : statements) {
-      Object res = excecute(stmt);
-      return res.str();
+    for (auto &stmt : statements) {
+      if (stmt)
+        excecute(stmt);
     }
   } catch (RuntimeError error) {
     crux::runtimeError(error);
-    return Object().str();
   }
-  return Object().str();
 }
 
-void Interpreter::visitPrintStmnt(Print *expr) {
-  Object value = evaluate(expr->expression);
+void Interpreter::visitPrintStmnt(Print *stmnt) {
+  Object value = evaluate(stmnt->expression);
   std::cout << value.str() << "\n";
   return;
 }
 
-Object Interpreter::visitExprStmnt(Expression *expr) {
-  return evaluate(expr->expression);
+void Interpreter::visitExprStmnt(Expression *stmnt) {
+  evaluate(stmnt->expression);
+}
+
+void Interpreter::visitVarStmnt(Var *stmnt) {
+  Object value;
+
+  if (stmnt->expression != nullptr) {
+    value = evaluate(stmnt->expression);
+  }
+  environment->define(stmnt->name->lexeme, value);
+}
+
+Object Interpreter::visitVariableExp(Variable *expr) {
+  return environment->get(expr->name);
+}
+
+Object Interpreter::visitAssignment(Assignment *expr) {
+  Object value = evaluate(expr->value);
+  environment->assign(expr->name, value);
+  return value;
 }
 
 Object Interpreter::visitLiteral(Literal *expr) { return *expr->literal; }

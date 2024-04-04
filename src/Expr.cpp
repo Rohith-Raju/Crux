@@ -50,3 +50,11 @@ Literal::~Literal() { delete literal; }
 Variable::Variable(Token *name) : Expr(ExprType_Variable), name(name) {}
 
 Variable::~Variable() { delete name; }
+
+Assignment::Assignment(Token *name, Expr *value)
+    : Expr(ExprType_Assignment), name(name), value(value) {}
+
+Assignment::~Assignment() {
+  delete name;
+  delete value;
+}

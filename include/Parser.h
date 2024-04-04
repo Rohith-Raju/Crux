@@ -16,6 +16,9 @@ private:
   };
   std::vector<Token> tokens;
   int current = 0;
+
+  // Precidence
+  Expr *assignment();
   Expr *expression();
   Expr *ternary();
   Expr *comparison();
