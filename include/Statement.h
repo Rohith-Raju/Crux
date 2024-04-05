@@ -6,8 +6,14 @@
 #define CRUX_STATEMENT_H
 
 #include "Expr.h"
+#include <vector>
 
-enum Statement_type { StmntExpr_type, StmntPrint_type, StmntVar_type };
+enum Statement_type {
+  StmntExpr_type,
+  StmntPrint_type,
+  StmntVar_type,
+  StmntBlock_type
+};
 
 class Statement {
 public:
@@ -35,6 +41,13 @@ public:
   Expr *expression;
   Var(Token *name, Expr *expression);
   ~Var();
+};
+
+class Block : public Statement {
+public:
+  std::vector<Statement *> stmnt;
+  Block();
+  Block(std::vector<Statement *> stmtn);
 };
 
 #endif

@@ -3,6 +3,7 @@
 //
 
 #include "Statement.h"
+#include <vector>
 
 Statement::Statement(Statement_type type) : type(type) {}
 
@@ -21,3 +22,8 @@ Var::~Var() {
   delete name;
   delete expression;
 }
+
+Block::Block() : Statement(StmntBlock_type) {}
+
+Block::Block(std::vector<Statement *> stmnt)
+    : Statement(StmntBlock_type), stmnt(stmnt) {}

@@ -46,7 +46,20 @@ Statement *Parser::varDeclaration() {
 Statement *Parser::statement() {
   if (match(PRINT))
     return printStatement();
+  if (match(LEFT_BRACE))
+    return new Block(blockStatement());
   return expressionStatement();
+}
+
+std::vector<Statement *> Parser::blockStatement() {
+  std::vector<Statement *> stmnts;
+
+  if (!check(RIGHT_BRACE) && !isAtEnd()) {
+    stmnts.push_back(declaration());
+  }
+
+  consume(RIGHT_BRACE, "Expect closing } after the block");
+  return stmnts;
 }
 
 Statement *Parser::printStatement() {
@@ -74,7 +87,7 @@ Expr *Parser::assignment() {
       Token *name = var->name;
       return new Assignment(name, value);
     }
-    error(peek(), "Invalid assignment target.");
+    error(equals, "Invalid assignment target.");
   }
   return expr;
 }

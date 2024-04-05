@@ -18,6 +18,8 @@ private:
 
   void excecute(Statement *stmnt);
 
+  void excecuteBlock(std::vector<Statement *> stmnts, Environment *env);
+
   Object evaluate(Expr *expr);
 
   bool isTruthy(Object right);
@@ -34,6 +36,8 @@ public:
   void interpret(std::vector<Statement *> &statements);
 
   void visitPrintStmnt(Print *expr);
+
+  void visitBlockStmnt(Block *expr);
 
   void visitExprStmnt(Expression *expr);
 

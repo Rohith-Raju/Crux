@@ -5,6 +5,7 @@
 #include "Interpreter.h"
 #include "Error.h"
 #include "Expr.h"
+#include "Statement.h"
 #include "utls/Object.h"
 #include "utls/RuntimeError.h"
 #include <iostream>
@@ -22,6 +23,8 @@ void Interpreter::excecute(Statement *stmnt) {
   case StmntVar_type:
     visitVarStmnt((Var *)stmnt);
     break;
+  case StmntBlock_type:
+    visitBlockStmnt((Block *)stmnt);
   }
 }
 
@@ -112,6 +115,22 @@ void Interpreter::visitVarStmnt(Var *stmnt) {
     value = evaluate(stmnt->expression);
   }
   environment->define(stmnt->name->lexeme, value);
+}
+
+void Interpreter::visitBlockStmnt(Block *stmnt) {
+  excecuteBlock(stmnt->stmnt, environment);
+}
+
+void Interpreter::excecuteBlock(std::vector<Statement *> stmnts,
+                                Environment *env) {
+  Environment *previous = environment;
+  environment = env;
+  for (Statement *stmnt : stmnts) {
+    excecute(stmnt);
+    if (crux::hadRuntimeError)
+      break;
+  }
+  environment = previous;
 }
 
 Object Interpreter::visitVariableExp(Variable *expr) {

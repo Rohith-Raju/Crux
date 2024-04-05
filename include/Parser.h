@@ -31,6 +31,7 @@ private:
   Statement *statement();
   Statement *printStatement();
   Statement *expressionStatement();
+  std::vector<Statement *> blockStatement();
 
   // Variable stuff
   Statement *declaration();
