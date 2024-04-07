@@ -24,7 +24,7 @@ void Environment::assign(Token *name, Object value) {
     return;
   }
 
-  throw new RuntimeError(*name, "Undefined variable " + name->lexeme);
+  throw RuntimeError(*name, "Undefined variable " + name->lexeme);
 }
 
 Object Environment::get(Token *name) {
@@ -34,8 +34,7 @@ Object Environment::get(Token *name) {
   if (enclosing != nullptr) {
     return enclosing->get(name);
   }
-
-  throw new RuntimeError(*name, "Unexpected variable " + name->lexeme);
+  throw RuntimeError(*name, "Unexpected variable " + name->lexeme);
 }
 
 Environment::~Environment() { delete enclosing; }

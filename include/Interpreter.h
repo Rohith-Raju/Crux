@@ -39,7 +39,7 @@ public:
 
   void visitBlockStmnt(Block *expr);
 
-  void visitExprStmnt(Expression *expr);
+  Object visitExprStmnt(Expression *expr);
 
   void visitVarStmnt(Var *expr);
 
@@ -56,6 +56,8 @@ public:
   Object visitTernaryExp(Ternary *expr);
 
   Object visitVariableExp(Variable *expr);
+
+  ~Interpreter();
 };
 
 #endif // CRUX_INTERPRETER_H

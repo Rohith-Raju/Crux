@@ -104,8 +104,10 @@ void Interpreter::visitPrintStmnt(Print *stmnt) {
   return;
 }
 
-void Interpreter::visitExprStmnt(Expression *stmnt) {
-  evaluate(stmnt->expression);
+Object Interpreter::visitExprStmnt(Expression *stmnt) {
+  Object value = evaluate(stmnt->expression);
+  std::cout << value.str() << "\n";
+  return value;
 }
 
 void Interpreter::visitVarStmnt(Var *stmnt) {
@@ -118,7 +120,7 @@ void Interpreter::visitVarStmnt(Var *stmnt) {
 }
 
 void Interpreter::visitBlockStmnt(Block *stmnt) {
-  excecuteBlock(stmnt->stmnt, environment);
+  excecuteBlock(stmnt->stmnt, new Environment(environment));
 }
 
 void Interpreter::excecuteBlock(std::vector<Statement *> stmnts,
@@ -207,7 +209,7 @@ Object Interpreter::visitBinaryExp(Binary *expr) {
   case EQUAL_EQUAL:
     return isEqual(left, right);
   }
-  RuntimeError(*op, "Operator not found");
+  throw RuntimeError(*op, "Operator not found");
 }
 
 Object Interpreter::visitTernaryExp(Ternary *expr) {
@@ -222,3 +224,5 @@ Object Interpreter::visitTernaryExp(Ternary *expr) {
   }
   return Object();
 }
+
+Interpreter::~Interpreter() { delete environment; }

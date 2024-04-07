@@ -54,7 +54,7 @@ Statement *Parser::statement() {
 std::vector<Statement *> Parser::blockStatement() {
   std::vector<Statement *> stmnts;
 
-  if (!check(RIGHT_BRACE) && !isAtEnd()) {
+  while (!check(RIGHT_BRACE) && !isAtEnd()) {
     stmnts.push_back(declaration());
   }
 
