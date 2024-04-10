@@ -4,6 +4,7 @@
 #include "Expr.h"
 #include "Statement.h"
 #include "Token.h"
+#include "utls/Object.h"
 #include <vector>
 
 std::vector<Statement *> Parser::parse() {
@@ -46,11 +47,14 @@ Statement *Parser::varDeclaration() {
 Statement *Parser::statement() {
   if (match(PRINT))
     return printStatement();
+  if (match(IF))
+    return ifStatement();
+  if (match(WHILE))
+    return whileStatement();
   if (match(LEFT_BRACE))
     return new Block(blockStatement());
   return expressionStatement();
 }
-
 std::vector<Statement *> Parser::blockStatement() {
   std::vector<Statement *> stmnts;
 
@@ -60,6 +64,77 @@ std::vector<Statement *> Parser::blockStatement() {
 
   consume(RIGHT_BRACE, "Expect closing } after the block");
   return stmnts;
+}
+
+Statement *Parser::ifStatement() {
+  consume(LEFT_PAREN, "expected ( after if");
+  Expr *expr = expression();
+  consume(RIGHT_PAREN, "expected ) after if statement");
+
+  Statement *thenBranch = statement();
+
+  Statement *elseBranch = nullptr;
+  if (match(ELSE)) {
+    elseBranch = statement();
+  }
+  return new If(expr, thenBranch, elseBranch);
+}
+
+Statement *Parser::whileStatement() {
+  consume(LEFT_PAREN, "expected ( after while");
+  Expr *expr = expression();
+  consume(RIGHT_PAREN, "expected ) after while");
+  Statement *body = statement();
+  return new While(expr, body);
+}
+
+Statement *Parser::forStatement() {
+  consume(LEFT_PAREN, "expected ( after for");
+  Statement *initializer;
+
+  if (match(SEMICOLON))
+    initializer = nullptr;
+  else if (match(VAR))
+    initializer = varDeclaration();
+  else
+    initializer = declaration();
+
+  Expr *condition;
+  if (match(SEMICOLON))
+    condition = nullptr;
+  else
+    condition = expression();
+
+  Expr *increment;
+  if (match(SEMICOLON))
+    increment = nullptr;
+  else
+    increment = expression();
+
+  consume(RIGHT_PAREN, "expected ) after clause");
+
+  Statement *body;
+  body = statement();
+
+  if (increment) {
+    std::vector<Statement *> stmnts;
+    stmnts.push_back(body);
+    stmnts.push_back(new Expression(increment));
+    body = new Block(stmnts);
+  }
+
+  if (!condition)
+    Object *condition = new Object(true);
+
+  body = new While(condition, body);
+
+  if (initializer) {
+    std::vector<Statement *> stmnts;
+    stmnts.push_back(initializer);
+    stmnts.push_back(body);
+    body = new Block(stmnts);
+  }
+  return body;
 }
 
 Statement *Parser::printStatement() {
@@ -77,7 +152,7 @@ Statement *Parser::expressionStatement() {
 Expr *Parser::expression() { return assignment(); }
 
 Expr *Parser::assignment() {
-  Expr *expr = ternary();
+  Expr *expr = Or();
 
   if (match(EQUAL)) {
     Token equals = previous();
@@ -88,6 +163,28 @@ Expr *Parser::assignment() {
       return new Assignment(name, value);
     }
     error(equals, "Invalid assignment target.");
+  }
+  return expr;
+}
+
+Expr *Parser::Or() {
+  Expr *expr = And();
+
+  while (match(OR)) {
+    Token *op = new Token(previous());
+    Expr *right = And();
+    expr = new Logical(expr, op, right);
+  }
+  return expr;
+}
+
+Expr *Parser::And() {
+  Expr *expr = ternary();
+
+  while (match(AND)) {
+    Token *op = new Token(previous());
+    Expr *right = ternary();
+    expr = new Logical(expr, op, right);
   }
   return expr;
 }

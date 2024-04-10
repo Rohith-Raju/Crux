@@ -35,15 +35,21 @@ private:
 public:
   void interpret(std::vector<Statement *> &statements);
 
-  void visitPrintStmnt(Print *expr);
+  void visitPrintStmnt(Print *stmnt);
 
-  void visitBlockStmnt(Block *expr);
+  void visitBlockStmnt(Block *stmnt);
 
-  Object visitExprStmnt(Expression *expr);
+  Object visitExprStmnt(Expression *stmnt);
 
-  void visitVarStmnt(Var *expr);
+  void visitVarStmnt(Var *stmnt);
+
+  void visitIfStmnt(If *stmnt);
+
+  void visitWhileStmnt(While *stmnt);
 
   Object visitAssignment(Assignment *expr);
+
+  Object visitLogicalExp(Logical *expr);
 
   Object visitLiteral(Literal *expr);
 

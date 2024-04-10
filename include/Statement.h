@@ -12,7 +12,9 @@ enum Statement_type {
   StmntExpr_type,
   StmntPrint_type,
   StmntVar_type,
-  StmntBlock_type
+  StmntBlock_type,
+  StmntIf_type,
+  StmntWhile_type
 };
 
 class Statement {
@@ -46,8 +48,25 @@ public:
 class Block : public Statement {
 public:
   std::vector<Statement *> stmnt;
-  Block();
-  Block(std::vector<Statement *> stmtn);
+  Block(std::vector<Statement *> stmnt);
+};
+
+class If : public Statement {
+public:
+  Expr *condition;
+  Statement *thenBranch;
+  Statement *elseBranch;
+
+  If(Expr *expression, Statement *thenBranch, Statement *elseBranch);
+  ~If();
+};
+
+class While : public Statement {
+public:
+  Expr *condition;
+  Statement *body;
+  While(Expr *condition, Statement *body);
+  ~While();
 };
 
 #endif

@@ -18,6 +18,8 @@ private:
   int current = 0;
 
   // Precidence
+  Expr *Or();
+  Expr *And();
   Expr *assignment();
   Expr *expression();
   Expr *ternary();
@@ -30,6 +32,9 @@ private:
   // Statement helper functions
   Statement *statement();
   Statement *printStatement();
+  Statement *ifStatement();
+  Statement *whileStatement();
+  Statement *forStatement();
   Statement *expressionStatement();
   std::vector<Statement *> blockStatement();
 

@@ -43,6 +43,15 @@ Ternary::~Ternary() {
   delete expression2;
 }
 
+Logical::Logical(Expr *left, Token *op, Expr *right)
+    : Expr(ExprType_Logical), left(left), op(op), right(right) {}
+
+Logical::~Logical() {
+  delete left;
+  delete op;
+  delete right;
+}
+
 Literal::Literal(Object *literal) : Expr(ExprType_Literal), literal(literal) {}
 
 Literal::~Literal() { delete literal; }

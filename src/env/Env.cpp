@@ -3,6 +3,7 @@
 //
 
 #include "env/Env.h"
+#include "utls/Object.h"
 #include "utls/RuntimeError.h"
 
 Environment::Environment() : enclosing(nullptr) {}
@@ -28,8 +29,13 @@ void Environment::assign(Token *name, Object value) {
 }
 
 Object Environment::get(Token *name) {
-  if (values.find(name->lexeme) != values.end())
+  if (values.find(name->lexeme) != values.end()) {
+    Object obj = values[name->lexeme];
+    if (obj.type == nullptr_type)
+      throw RuntimeError(*name, "Uninitalized variable " + name->lexeme +
+                                    " can't be computed");
     return values[name->lexeme];
+  }
 
   if (enclosing != nullptr) {
     return enclosing->get(name);

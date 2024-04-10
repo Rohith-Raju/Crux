@@ -23,7 +23,23 @@ Var::~Var() {
   delete expression;
 }
 
-Block::Block() : Statement(StmntBlock_type) {}
-
 Block::Block(std::vector<Statement *> stmnt)
     : Statement(StmntBlock_type), stmnt(stmnt) {}
+
+If::If(Expr *condition, Statement *thenBranch, Statement *elseBranch)
+    : Statement(StmntIf_type), condition(condition), thenBranch(thenBranch),
+      elseBranch(elseBranch) {}
+
+If::~If() {
+  delete condition;
+  delete thenBranch;
+  delete elseBranch;
+}
+
+While::While(Expr *condition, Statement *body)
+    : Statement(StmntWhile_type), condition(condition), body(body) {}
+
+While::~While() {
+  delete condition;
+  delete body;
+}

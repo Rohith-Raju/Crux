@@ -6,6 +6,7 @@
 #include "Error.h"
 #include "Expr.h"
 #include "Statement.h"
+#include "Token.h"
 #include "utls/Object.h"
 #include "utls/RuntimeError.h"
 #include <iostream>
@@ -25,6 +26,13 @@ void Interpreter::excecute(Statement *stmnt) {
     break;
   case StmntBlock_type:
     visitBlockStmnt((Block *)stmnt);
+    break;
+  case StmntIf_type:
+    visitIfStmnt((If *)stmnt);
+    break;
+  case StmntWhile_type:
+    visitWhileStmnt((While *)stmnt);
+    break;
   }
 }
 
@@ -119,6 +127,18 @@ void Interpreter::visitVarStmnt(Var *stmnt) {
   environment->define(stmnt->name->lexeme, value);
 }
 
+void Interpreter::visitIfStmnt(If *stmnt) {
+  if (isTruthy(evaluate(stmnt->condition)))
+    excecute(stmnt->thenBranch);
+  else if (stmnt->elseBranch)
+    excecute(stmnt->elseBranch);
+}
+
+void Interpreter::visitWhileStmnt(While *stmnt) {
+  while (isTruthy(evaluate(stmnt->condition)))
+    excecute(stmnt->body);
+}
+
 void Interpreter::visitBlockStmnt(Block *stmnt) {
   excecuteBlock(stmnt->stmnt, new Environment(environment));
 }
@@ -137,6 +157,17 @@ void Interpreter::excecuteBlock(std::vector<Statement *> stmnts,
 
 Object Interpreter::visitVariableExp(Variable *expr) {
   return environment->get(expr->name);
+}
+
+Object Interpreter::visitLogicalExp(Logical *expr) {
+  Object left = evaluate(expr->left);
+
+  if (expr->op->type == OR)
+    return isTruthy(left) ? left : Object();
+  if (expr->op->type == AND)
+    return !isTruthy(left) ? left : Object();
+
+  return evaluate(expr->right);
 }
 
 Object Interpreter::visitAssignment(Assignment *expr) {
