@@ -51,6 +51,8 @@ Statement *Parser::statement() {
     return ifStatement();
   if (match(WHILE))
     return whileStatement();
+  if (match(FOR))
+    return forStatement();
   if (match(LEFT_BRACE))
     return new Block(blockStatement());
   return expressionStatement();
@@ -67,9 +69,9 @@ std::vector<Statement *> Parser::blockStatement() {
 }
 
 Statement *Parser::ifStatement() {
-  consume(LEFT_PAREN, "expected ( after if");
+  consume(LEFT_PAREN, "Expected ( after if");
   Expr *expr = expression();
-  consume(RIGHT_PAREN, "expected ) after if statement");
+  consume(RIGHT_PAREN, "Expected ) after if statement");
 
   Statement *thenBranch = statement();
 
@@ -104,6 +106,8 @@ Statement *Parser::forStatement() {
     condition = nullptr;
   else
     condition = expression();
+
+  consume(SEMICOLON, "Expected ; after condition clause");
 
   Expr *increment;
   if (match(SEMICOLON))
