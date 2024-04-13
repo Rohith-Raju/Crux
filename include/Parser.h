@@ -1,12 +1,11 @@
 //
-// Created by Rohith on 2/9/24.
-//
 
 #ifndef CRUX_PARSER_H
 #define CRUX_PARSER_H
 
 #include "Expr.h"
 #include "Token.h"
+#include <Statement.h>
 #include <stdexcept>
 #include <vector>
 
@@ -17,6 +16,14 @@ private:
   };
   std::vector<Token> tokens;
   int current = 0;
+  // loopCounter to determine if "break" is valid or not. (break should only
+  // occur in loops)
+  int loopCounter = 0;
+
+  // Precidence
+  Expr *Or();
+  Expr *And();
+  Expr *assignment();
   Expr *expression();
   Expr *ternary();
   Expr *comparison();
@@ -24,6 +31,20 @@ private:
   Expr *factor();
   Expr *unary();
   Expr *primary();
+
+  // Statement helper functions
+  Statement *statement();
+  Statement *printStatement();
+  Statement *ifStatement();
+  Statement *whileStatement();
+  Statement *forStatement();
+  Statement *breakStatement();
+  Statement *expressionStatement();
+  std::vector<Statement *> blockStatement();
+
+  // Variable stuff
+  Statement *declaration();
+  Statement *varDeclaration();
 
   // helper functions
   Expr *equality();
@@ -40,7 +61,7 @@ private:
 
 public:
   Parser(const std::vector<Token> &tokens) : tokens{tokens} {};
-  Expr *parse();
+  std::vector<Statement *> parse();
 };
 
 #endif // CRUX_PARSER_H

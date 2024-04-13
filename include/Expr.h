@@ -12,7 +12,10 @@ enum ExprType {
   ExprType_Grouping,
   ExprType_Unary,
   ExprType_Literal,
-  ExprType_Ternary
+  ExprType_Ternary,
+  ExprType_Variable,
+  ExprType_Assignment,
+  ExprType_Logical
 };
 
 class Expr {
@@ -67,6 +70,16 @@ public:
   ~Ternary();
 };
 
+class Logical : public Expr {
+public:
+  Expr *left;
+  Token *op;
+  Expr *right;
+  Logical(Expr *left, Token *op, Expr *right);
+
+  ~Logical();
+};
+
 class Literal : public Expr {
 public:
   Object *literal;
@@ -74,6 +87,26 @@ public:
   Literal(Object *literal);
 
   ~Literal();
+};
+
+class Variable : public Expr {
+public:
+  Token *name;
+
+  Variable(Token *name);
+
+  ~Variable();
+};
+
+class Assignment : public Expr {
+public:
+  Token *name;
+
+  Expr *value;
+
+  Assignment(Token *name, Expr *value);
+
+  ~Assignment();
 };
 
 #endif

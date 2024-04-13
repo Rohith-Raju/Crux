@@ -1,18 +1,210 @@
-//
+// Object
 #include "Parser.h"
 #include "Error.h"
 #include "Expr.h"
+#include "Statement.h"
 #include "Token.h"
+#include "utls/Object.h"
+#include <vector>
 
-Expr *Parser::parse() {
-  try {
-    return expression();
-  } catch (ParseError error) {
-    return nullptr;
+std::vector<Statement *> Parser::parse() {
+  std::vector<Statement *> statements;
+  while (!isAtEnd()) {
+    Statement *stmt = declaration();
+    if (crux::hasError) {
+      synchronize();
+      if (stmt) {
+        delete stmt;
+      }
+      stmt = nullptr;
+      break;
+    } else {
+      statements.push_back(stmt);
+    }
   }
+  return statements;
 }
 
-Expr *Parser::expression() { return ternary(); }
+Statement *Parser::declaration() {
+  if (match(VAR))
+    return varDeclaration();
+  return statement();
+}
+
+Statement *Parser::varDeclaration() {
+  Token *name = new Token(consume(IDENTIFIER, "variable name required"));
+
+  Expr *initializer = nullptr;
+
+  if (match(EQUAL)) {
+    initializer = expression();
+  }
+
+  consume(SEMICOLON, "Expected ; after the variable declaration");
+  return new Var(name, initializer);
+}
+
+Statement *Parser::statement() {
+  if (match(PRINT))
+    return printStatement();
+  if (match(IF))
+    return ifStatement();
+  if (match(WHILE))
+    return whileStatement();
+  if (match(FOR))
+    return forStatement();
+  if (match(BREAK))
+    return breakStatement();
+  if (match(LEFT_BRACE))
+    return new Block(blockStatement());
+  return expressionStatement();
+}
+std::vector<Statement *> Parser::blockStatement() {
+  std::vector<Statement *> stmnts;
+
+  while (!check(RIGHT_BRACE) && !isAtEnd()) {
+    stmnts.push_back(declaration());
+  }
+
+  consume(RIGHT_BRACE, "Expect closing } after the block");
+  return stmnts;
+}
+
+Statement *Parser::ifStatement() {
+  consume(LEFT_PAREN, "Expected ( after if");
+  Expr *expr = expression();
+  consume(RIGHT_PAREN, "Expected ) after if statement");
+
+  Statement *thenBranch = statement();
+
+  Statement *elseBranch = nullptr;
+  if (match(ELSE)) {
+    elseBranch = statement();
+  }
+  return new If(expr, thenBranch, elseBranch);
+}
+
+Statement *Parser::whileStatement() {
+  consume(LEFT_PAREN, "Expected ( after while");
+  Expr *expr = expression();
+  consume(RIGHT_PAREN, "Expected ) after while");
+  loopCounter++;
+  Statement *body = statement();
+  loopCounter--;
+  return new While(expr, body);
+}
+
+Statement *Parser::forStatement() {
+  consume(LEFT_PAREN, "expected ( after for");
+  Statement *initializer;
+
+  if (match(SEMICOLON))
+    initializer = nullptr;
+  else if (match(VAR))
+    initializer = varDeclaration();
+  else
+    initializer = declaration();
+
+  Expr *condition;
+  if (match(SEMICOLON))
+    condition = nullptr;
+  else
+    condition = expression();
+
+  consume(SEMICOLON, "Expected ; after condition clause");
+
+  Expr *increment;
+  if (match(SEMICOLON))
+    increment = nullptr;
+  else
+    increment = expression();
+
+  consume(RIGHT_PAREN, "Expected ) after clause");
+
+  Statement *body;
+  body = statement();
+
+  if (increment) {
+    std::vector<Statement *> stmnts;
+    stmnts.push_back(body);
+    stmnts.push_back(new Expression(increment));
+    body = new Block(stmnts);
+  }
+
+  if (!condition)
+    Object *condition = new Object(true);
+
+  body = new While(condition, body);
+
+  if (initializer) {
+    std::vector<Statement *> stmnts;
+    stmnts.push_back(initializer);
+    stmnts.push_back(body);
+    body = new Block(stmnts);
+  }
+  return body;
+}
+
+Statement *Parser::breakStatement() {
+  if (loopCounter == 0) {
+    Token tkn = tokens[current];
+    crux::error(tkn, "break should ony occur in for/while loops");
+  }
+  consume(SEMICOLON, "Expected ';' after 'break'.");
+  return new Break(true);
+}
+
+Statement *Parser::printStatement() {
+  Expr *expr = expression();
+  consume(SEMICOLON, "Expected ; at the end of the statement");
+  return new Print(expr);
+}
+
+Statement *Parser::expressionStatement() {
+  Expr *expr = expression();
+  consume(SEMICOLON, "Expected ; at the end of the statement");
+  return new Expression(expr);
+}
+
+Expr *Parser::expression() { return assignment(); }
+
+Expr *Parser::assignment() {
+  Expr *expr = Or();
+
+  if (match(EQUAL)) {
+    Token equals = previous();
+    Expr *value = assignment();
+    if (expr->type == ExprType_Variable) {
+      Variable *var = (Variable *)expr;
+      Token *name = var->name;
+      return new Assignment(name, value);
+    }
+    error(equals, "Invalid assignment target.");
+  }
+  return expr;
+}
+
+Expr *Parser::Or() {
+  Expr *expr = And();
+
+  while (match(OR)) {
+    Token *op = new Token(previous());
+    Expr *right = And();
+    expr = new Logical(expr, op, right);
+  }
+  return expr;
+}
+
+Expr *Parser::And() {
+  Expr *expr = ternary();
+
+  while (match(AND)) {
+    Token *op = new Token(previous());
+    Expr *right = ternary();
+    expr = new Logical(expr, op, right);
+  }
+  return expr;
+}
 
 Expr *Parser::ternary() {
   Expr *expr = equality();
@@ -84,8 +276,10 @@ Expr *Parser::unary() {
 Expr *Parser::primary() {
   if (match(FALSE))
     return new Literal(new Object(false));
+
   if (match(TRUE))
     return new Literal(new Object(true));
+
   if (match(NIL))
     return new Literal(new Object());
 
@@ -95,6 +289,10 @@ Expr *Parser::primary() {
 
   if (match(STRING)) {
     return new Literal(new Object(previous().literal));
+  }
+
+  if (match(IDENTIFIER)) {
+    return new Variable(new Token(previous()));
   }
 
   if (match(LEFT_PAREN)) {
