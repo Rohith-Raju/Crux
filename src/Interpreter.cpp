@@ -1,6 +1,4 @@
 //
-// Created by Rohith on 3/17/24
-//
 
 #include "Interpreter.h"
 #include "Error.h"
@@ -33,6 +31,8 @@ void Interpreter::excecute(Statement *stmnt) {
   case StmntWhile_type:
     visitWhileStmnt((While *)stmnt);
     break;
+  case StmntBreak_type:
+    isBreakUsed = true;
   }
 }
 
@@ -135,10 +135,12 @@ void Interpreter::visitIfStmnt(If *stmnt) {
 }
 
 void Interpreter::visitWhileStmnt(While *stmnt) {
-  while (isTruthy(evaluate(stmnt->condition)))
+  while (isTruthy(evaluate(stmnt->condition))) {
     excecute(stmnt->body);
+    if (isBreakUsed)
+      break;
+  }
 }
-
 void Interpreter::visitBlockStmnt(Block *stmnt) {
   excecuteBlock(stmnt->stmnt, new Environment(environment));
 }
@@ -191,7 +193,7 @@ Object Interpreter::visitUnaryExp(Unary *expr) {
     checkNumberOperand(expr->op, right);
     return -right.num_literal;
   default:
-    RuntimeError(*expr->op, "Invalid operator used");
+    throw RuntimeError(*expr->op, "Invalid operator used");
   }
   return Object();
 }

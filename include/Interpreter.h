@@ -33,6 +33,8 @@ private:
   bool checkCompatibility(Token *op, Object left, Object right);
 
 public:
+  bool isBreakUsed = false;
+
   void interpret(std::vector<Statement *> &statements);
 
   void visitPrintStmnt(Print *stmnt);

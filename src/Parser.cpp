@@ -53,6 +53,8 @@ Statement *Parser::statement() {
     return whileStatement();
   if (match(FOR))
     return forStatement();
+  if (match(BREAK))
+    return breakStatement();
   if (match(LEFT_BRACE))
     return new Block(blockStatement());
   return expressionStatement();
@@ -83,10 +85,12 @@ Statement *Parser::ifStatement() {
 }
 
 Statement *Parser::whileStatement() {
-  consume(LEFT_PAREN, "expected ( after while");
+  consume(LEFT_PAREN, "Expected ( after while");
   Expr *expr = expression();
-  consume(RIGHT_PAREN, "expected ) after while");
+  consume(RIGHT_PAREN, "Expected ) after while");
+  loopCounter++;
   Statement *body = statement();
+  loopCounter--;
   return new While(expr, body);
 }
 
@@ -115,7 +119,7 @@ Statement *Parser::forStatement() {
   else
     increment = expression();
 
-  consume(RIGHT_PAREN, "expected ) after clause");
+  consume(RIGHT_PAREN, "Expected ) after clause");
 
   Statement *body;
   body = statement();
@@ -139,6 +143,15 @@ Statement *Parser::forStatement() {
     body = new Block(stmnts);
   }
   return body;
+}
+
+Statement *Parser::breakStatement() {
+  if (loopCounter == 0) {
+    Token tkn = tokens[current];
+    crux::error(tkn, "break should ony occur in for/while loops");
+  }
+  consume(SEMICOLON, "Expected ';' after 'break'.");
+  return new Break(true);
 }
 
 Statement *Parser::printStatement() {

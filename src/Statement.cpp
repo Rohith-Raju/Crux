@@ -43,3 +43,6 @@ While::~While() {
   delete condition;
   delete body;
 }
+
+Break::Break(bool isBrkPre)
+    : Statement(StmntBreak_type), isBreakPresent(isBrkPre) {}

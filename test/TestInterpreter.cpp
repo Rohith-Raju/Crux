@@ -7,51 +7,70 @@
 #include "Scanner.h"
 #include "gtest/gtest.h"
 #include <Statement.h>
+#include <iostream>
+#include <stdexcept>
+#include <streambuf>
 #include <string>
 #include <vector>
 
-TEST(InterpreterTest, TestInterpreterFlow) {
+TEST(InterpreterTest, TestInterpreterExpression) {
   std::string test = "10 + (40 + (20 - 30) - 10) + 50;";
   Scanner scan(test);
   std::vector<Token> tokens = scan.scanTokens();
   Parser p(tokens);
   std::vector<Statement *> statements = p.parse();
-  // ASSERT_EQ(Interpreter{}.interpret(statements), "80.000000");
+  testing::internal::CaptureStdout();
+  Interpreter{}.interpret(statements);
+  std::string result = testing::internal::GetCapturedStdout();
+  ASSERT_EQ(result, "80.000000\n");
 }
 
-TEST(InterpreterTest, TestInterpreterUnary) {
+TEST(InterpreterTest, TestInterpreterUnaryExpression) {
   std::string test = "!true;";
   Scanner scan(test);
   std::vector<Token> tokens = scan.scanTokens();
   Parser p(tokens);
   std::vector<Statement *> statements = p.parse();
-  // ASSERT_EQ(Interpreter{}.interpret(statements), "false");
+  testing::internal::CaptureStdout();
+  Interpreter{}.interpret(statements);
+  std::string result = testing::internal::GetCapturedStdout();
+  ASSERT_EQ(result, "false\n");
 }
 
-TEST(InterpreterTest, TestParserTernary) {
+TEST(InterpreterTest, TestParserTernaryExpression) {
   std::string test = "3 > 1 ? true : false;";
   Scanner scan(test);
   std::vector<Token> tokens = scan.scanTokens();
   Parser p(tokens);
   std::vector<Statement *> statements = p.parse();
-  // ASSERT_EQ(Interpreter{}.interpret(statements), "true");
+  testing::internal::CaptureStdout();
+  Interpreter{}.interpret(statements);
+  std::string result = testing::internal::GetCapturedStdout();
+  ASSERT_EQ(result, "true\n");
 }
 
-TEST(IntrepreterTest, TestStringNumExpressions) {
-  std::string test1 = "\"test\"+8;";
-  std::string test2 = "8+\"test\";";
+TEST(InterpreterTest, TestInterpreterVarStatement) {
 
-  Scanner scan1(test1);
-  Scanner scan2(test2);
-  std::vector<Token> tokens1 = scan1.scanTokens();
-  std::vector<Token> tokens2 = scan2.scanTokens();
+  std::string test = "var a = 10; print(a);";
+  std::string test_f = "a = 10"; // fails
 
-  Parser p1(tokens1);
-  Parser p2(tokens2);
+  Scanner scan(test);
+  Scanner scan_f(test_f);
 
-  std::vector<Statement *> statements1 = p1.parse();
-  std::vector<Statement *> statements2 = p2.parse();
+  std::vector<Token> token = scan.scanTokens();
+  std::vector<Token> token_f = scan_f.scanTokens();
 
-  // ASSERT_EQ(Interpreter{}.interpret(statements1), "test8.000000");
-  // ASSERT_EQ(Interpreter{}.interpret(statements2), "8.000000test");
+  Parser parser(token);
+  Parser parser_f(token_f);
+
+  std::vector<Statement *> statement = parser.parse();
+
+  std::stringstream buffer;
+  std::streambuf *sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+  Interpreter{}.interpret(statement);
+  std::cout.rdbuf(sbuf);
+  ASSERT_EQ(buffer.str(), "10.000000\n");
+
+  EXPECT_THROW(parser_f.parse(), std::runtime_error);
 }

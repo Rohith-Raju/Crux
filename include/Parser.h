@@ -16,6 +16,9 @@ private:
   };
   std::vector<Token> tokens;
   int current = 0;
+  // loopCounter to determine if "break" is valid or not. (break should only
+  // occur in loops)
+  int loopCounter = 0;
 
   // Precidence
   Expr *Or();
@@ -35,6 +38,7 @@ private:
   Statement *ifStatement();
   Statement *whileStatement();
   Statement *forStatement();
+  Statement *breakStatement();
   Statement *expressionStatement();
   std::vector<Statement *> blockStatement();
 

@@ -14,7 +14,8 @@ enum Statement_type {
   StmntVar_type,
   StmntBlock_type,
   StmntIf_type,
-  StmntWhile_type
+  StmntWhile_type,
+  StmntBreak_type
 };
 
 class Statement {
@@ -67,6 +68,12 @@ public:
   Statement *body;
   While(Expr *condition, Statement *body);
   ~While();
+};
+
+class Break : public Statement {
+public:
+  bool isBreakPresent = false;
+  Break(bool breakSet);
 };
 
 #endif

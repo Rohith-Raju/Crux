@@ -210,4 +210,5 @@ void tkn::initializeKeywords() {
   keywords["true"] = TRUE;
   keywords["var"] = VAR;
   keywords["while"] = WHILE;
+  keywords["break"] = BREAK;
 }
