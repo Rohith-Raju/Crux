@@ -114,7 +114,6 @@ void Interpreter::visitPrintStmnt(Print *stmnt) {
 
 Object Interpreter::visitExprStmnt(Expression *stmnt) {
   Object value = evaluate(stmnt->expression);
-  std::cout << value.str() << "\n";
   return value;
 }
 
