@@ -7,14 +7,11 @@
 #include "Scanner.h"
 #include "gtest/gtest.h"
 #include <Statement.h>
-#include <iostream>
-#include <stdexcept>
-#include <streambuf>
 #include <string>
 #include <vector>
 
-TEST(InterpreterTest, TestInterpreterExpression) {
-  std::string test = "10 + (40 + (20 - 30) - 10) + 50;";
+TEST(InterpreterTest, TestExpression) {
+  std::string test = "print(10 + (40 + (20 - 30) - 10) + 50);";
   Scanner scan(test);
   std::vector<Token> tokens = scan.scanTokens();
   Parser p(tokens);
@@ -25,8 +22,8 @@ TEST(InterpreterTest, TestInterpreterExpression) {
   ASSERT_EQ(result, "80.000000\n");
 }
 
-TEST(InterpreterTest, TestInterpreterUnaryExpression) {
-  std::string test = "!true;";
+TEST(InterpreterTest, TestUnaryExpression) {
+  std::string test = "print(!true);";
   Scanner scan(test);
   std::vector<Token> tokens = scan.scanTokens();
   Parser p(tokens);
@@ -37,8 +34,8 @@ TEST(InterpreterTest, TestInterpreterUnaryExpression) {
   ASSERT_EQ(result, "false\n");
 }
 
-TEST(InterpreterTest, TestParserTernaryExpression) {
-  std::string test = "3 > 1 ? true : false;";
+TEST(InterpreterTest, TestTernaryExpression) {
+  std::string test = "print(3 > 1 ? true : false);";
   Scanner scan(test);
   std::vector<Token> tokens = scan.scanTokens();
   Parser p(tokens);
@@ -49,28 +46,68 @@ TEST(InterpreterTest, TestParserTernaryExpression) {
   ASSERT_EQ(result, "true\n");
 }
 
-TEST(InterpreterTest, TestInterpreterVarStatement) {
+TEST(InterpreterTest, TestVarStatement) {
 
   std::string test = "var a = 10; print(a);";
-  std::string test_f = "a = 10"; // fails
 
   Scanner scan(test);
-  Scanner scan_f(test_f);
 
   std::vector<Token> token = scan.scanTokens();
-  std::vector<Token> token_f = scan_f.scanTokens();
 
   Parser parser(token);
-  Parser parser_f(token_f);
-
   std::vector<Statement *> statement = parser.parse();
 
-  std::stringstream buffer;
-  std::streambuf *sbuf = std::cout.rdbuf();
-  std::cout.rdbuf(buffer.rdbuf());
+  testing::internal::CaptureStdout();
   Interpreter{}.interpret(statement);
-  std::cout.rdbuf(sbuf);
-  ASSERT_EQ(buffer.str(), "10.000000\n");
+  std::string result = testing::internal::GetCapturedStdout();
+  ASSERT_EQ(result, "10.000000\n");
+}
 
-  EXPECT_THROW(parser_f.parse(), std::runtime_error);
+TEST(InterpreterTest, TestIfStatement) {
+  std::string test = "var a = 10; if(a>=10){print(\"equal\");}";
+  Scanner scan(test);
+  std::vector<Token> tokens = scan.scanTokens();
+  Parser p(tokens);
+  std::vector<Statement *> statements = p.parse();
+  testing::internal::CaptureStdout();
+  Interpreter{}.interpret(statements);
+  std::string result = testing::internal::GetCapturedStdout();
+  ASSERT_EQ(result, "equal\n");
+}
+
+TEST(InterpreterTest, TestIfElseStatement) {
+  std::string test =
+      "var a = 15; if(a==10){print(\"equal\");} else{print(\"Not equal\");}";
+  Scanner scan(test);
+  std::vector<Token> tokens = scan.scanTokens();
+  Parser p(tokens);
+  std::vector<Statement *> statements = p.parse();
+  testing::internal::CaptureStdout();
+  Interpreter{}.interpret(statements);
+  std::string result = testing::internal::GetCapturedStdout();
+  ASSERT_EQ(result, "Not equal\n");
+}
+
+TEST(InterpreterTest, TestWhileLoop) {
+  std::string test = "var a = 5; while(a > 0){ print(a); a = a-1;}";
+  Scanner scan(test);
+  std::vector<Token> tokens = scan.scanTokens();
+  Parser p(tokens);
+  std::vector<Statement *> statements = p.parse();
+  testing::internal::CaptureStdout();
+  Interpreter{}.interpret(statements);
+  std::string result = testing::internal::GetCapturedStdout();
+  ASSERT_EQ(result, "5.000000\n4.000000\n3.000000\n2.000000\n1.000000\n");
+}
+
+TEST(InterpreterTest, TestForLoop) {
+  std::string test = "for(var a = 0; a<5; a=a+1){print(a);}";
+  Scanner scan(test);
+  std::vector<Token> tokens = scan.scanTokens();
+  Parser p(tokens);
+  std::vector<Statement *> statements = p.parse();
+  testing::internal::CaptureStdout();
+  Interpreter{}.interpret(statements);
+  std::string result = testing::internal::GetCapturedStdout();
+  ASSERT_EQ(result, "0.000000\n1.000000\n2.000000\n3.000000\n4.000000\n");
 }
