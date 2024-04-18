@@ -14,7 +14,7 @@
 
 class Interpreter {
 private:
-  Environment *environment = new Environment();
+  static Environment *environment;
 
   void excecute(Statement *stmnt);
 
@@ -33,7 +33,11 @@ private:
   bool checkCompatibility(Token *op, Object left, Object right);
 
 public:
+  static Environment *globals;
+
   bool isBreakUsed = false;
+
+  Interpreter();
 
   void interpret(std::vector<Statement *> &statements);
 
@@ -56,6 +60,8 @@ public:
   Object visitLiteral(Literal *expr);
 
   Object visitGroupExp(Grouping *expr);
+
+  Object visitCall(Call *stmnt);
 
   Object visitUnaryExp(Unary *expr);
 

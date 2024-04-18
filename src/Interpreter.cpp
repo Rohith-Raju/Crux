@@ -1,6 +1,7 @@
 //
 
 #include "Interpreter.h"
+#include "CruxCallable.h"
 #include "Error.h"
 #include "Expr.h"
 #include "Statement.h"
@@ -8,8 +9,17 @@
 #include "utls/Object.h"
 #include "utls/RuntimeError.h"
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
+
+Environment *Interpreter::environment;
+Environment *Interpreter::globals;
+
+Interpreter::Interpreter() {
+  globals = new Environment();
+  environment = globals;
+}
 
 void Interpreter::excecute(Statement *stmnt) {
   switch (stmnt->type) {
@@ -52,6 +62,8 @@ Object Interpreter::evaluate(Expr *expr) {
     return visitVariableExp((Variable *)expr);
   case ExprType_Assignment:
     return visitAssignment((Assignment *)expr);
+  case ExprType_Call:
+    return visitCall((Call *)expr);
   }
   return Object();
 }
@@ -183,6 +195,31 @@ Object Interpreter::visitGroupExp(Grouping *expr) {
   return evaluate(expr->expression);
 }
 
+Object Interpreter::visitCall(Call *stmnt) {
+  Object callee = evaluate(stmnt->callee);
+
+  std::vector<Object> arguments;
+
+  for (auto args : stmnt->arguments) {
+    arguments.push_back(args);
+  }
+
+  if (callee.type != function_type) {
+    throw RuntimeError(*stmnt->paren, "call only allowed on functions");
+  }
+
+  CruxCallable *function = callee.function;
+
+  if (arguments.size() != function->arity()) {
+    std::stringstream ss;
+    ss << "Expected " << function->arity() << " arguments but got "
+       << arguments.size();
+    RuntimeError(*stmnt->paren, ss.str());
+  }
+
+  return function->call(this, arguments);
+}
+
 Object Interpreter::visitUnaryExp(Unary *expr) {
   Object right = evaluate(expr->right);
   switch (expr->op->type) {
@@ -257,4 +294,7 @@ Object Interpreter::visitTernaryExp(Ternary *expr) {
   return Object();
 }
 
-Interpreter::~Interpreter() { delete environment; }
+Interpreter::~Interpreter() {
+  delete environment;
+  delete globals;
+}

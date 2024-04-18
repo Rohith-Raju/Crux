@@ -270,8 +270,38 @@ Expr *Parser::unary() {
     Expr *right = primary();
     return new Unary(op, right);
   }
-  return primary();
+  return call();
 }
+
+Expr *Parser::call() {
+  Expr *expr = primary();
+
+  while (true) {
+    if (match(LEFT_PAREN)) {
+      expr = finishCall(expr);
+    } else {
+      break;
+    }
+  }
+  return expr;
+}
+
+Expr *Parser::finishCall(Expr *expr) {
+  std::vector<Expr *> arguments;
+  if (!check(RIGHT_PAREN)) {
+    do {
+      if (arguments.size() >= 255) {
+        error(peek(), "Can't have more than 255 arguments.");
+      }
+      arguments.push_back(expression());
+    } while (COMMA);
+  }
+  consume(RIGHT_PAREN, "Expected ')' after arguments");
+
+  return new Call(expr, new Token(previous()), arguments);
+}
+
+Statement *Parser::function(std::string str) {}
 
 Expr *Parser::primary() {
   if (match(FALSE))
@@ -282,6 +312,9 @@ Expr *Parser::primary() {
 
   if (match(NIL))
     return new Literal(new Object());
+
+  if (match(FUN))
+    return (Expr *)function("function");
 
   if (match(NUMBER)) {
     return new Literal(new Object(previous().literal));

@@ -2,6 +2,7 @@
 // Created by Rohith on 2/20/24.
 //
 #include "utls/Object.h"
+#include "CruxCallable.h"
 
 Object::Object() { type = nullptr_type; }
 
@@ -20,6 +21,11 @@ Object::Object(std::string type) {
   string_literal = type;
 }
 
+Object::Object(CruxCallable *type) {
+  this->type = function_type;
+  function = type;
+}
+
 std::string Object::str() {
   if (type == string_type) {
     return string_literal;
@@ -33,5 +39,9 @@ std::string Object::str() {
   if (type == bool_type) {
     return bool_literal ? "true" : "false";
   }
+  if (type == function_type) {
+    return function->str();
+  }
+
   return "";
 }

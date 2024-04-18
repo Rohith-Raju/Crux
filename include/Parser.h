@@ -30,7 +30,11 @@ private:
   Expr *term();
   Expr *factor();
   Expr *unary();
+  Expr *call();
   Expr *primary();
+
+  // Expr helper functions
+  Expr *finishCall(Expr *expr);
 
   // Statement helper functions
   Statement *statement();
@@ -40,6 +44,7 @@ private:
   Statement *forStatement();
   Statement *breakStatement();
   Statement *expressionStatement();
+  Statement *function(std::string str);
   std::vector<Statement *> blockStatement();
 
   // Variable stuff

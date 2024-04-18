@@ -46,3 +46,9 @@ While::~While() {
 
 Break::Break(bool isBrkPre)
     : Statement(StmntBreak_type), isBreakPresent(isBrkPre) {}
+
+Function::Function(Token *name, std::vector<Token *> params,
+                   std::vector<Statement *> body)
+    : Statement(StmntFunc_type), name(name), params(params), body(body) {}
+
+Function::~Function() { delete name; }

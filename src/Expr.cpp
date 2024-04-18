@@ -3,6 +3,7 @@
 //
 
 #include "Expr.h"
+#include <vector>
 
 Expr::Expr(ExprType type) : type(type) {}
 Token *op = new Token(STAR, "*", Object(), 1);
@@ -22,6 +23,14 @@ Grouping::Grouping(Expr *expression)
     : Expr(ExprType_Grouping), expression(expression) {}
 
 Grouping::~Grouping() { delete expression; }
+
+Call::Call(Expr *callee, Token *op, std::vector<Expr *> arguments)
+    : Expr(ExprType_Call), callee(callee), paren(op), arguments(arguments) {}
+
+Call::~Call() {
+  delete callee;
+  delete paren;
+}
 
 Unary::Unary(Token *op, Expr *right)
     : Expr(ExprType_Unary), op(op), right(right) {}
