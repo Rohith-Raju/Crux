@@ -18,8 +18,6 @@ private:
 
   void excecute(Statement *stmnt);
 
-  void excecuteBlock(std::vector<Statement *> stmnts, Environment *env);
-
   Object evaluate(Expr *expr);
 
   bool isTruthy(Object right);
@@ -35,9 +33,11 @@ private:
 public:
   static Environment *globals;
 
+  Interpreter();
+
   bool isBreakUsed = false;
 
-  Interpreter();
+  void excecuteBlock(std::vector<Statement *> stmnts, Environment *env);
 
   void interpret(std::vector<Statement *> &statements);
 
@@ -52,6 +52,8 @@ public:
   void visitIfStmnt(If *stmnt);
 
   void visitWhileStmnt(While *stmnt);
+
+  void visitFuncStmnt(Function *stmnt);
 
   Object visitAssignment(Assignment *expr);
 
@@ -70,8 +72,6 @@ public:
   Object visitTernaryExp(Ternary *expr);
 
   Object visitVariableExp(Variable *expr);
-
-  ~Interpreter();
 };
 
 #endif // CRUX_INTERPRETER_H

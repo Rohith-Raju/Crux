@@ -86,7 +86,6 @@ public:
 
   Function(Token *name, std::vector<Token *> params,
            std::vector<Statement *> body);
-  ~Function();
 };
 
 #endif

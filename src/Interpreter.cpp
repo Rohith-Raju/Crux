@@ -4,8 +4,11 @@
 #include "CruxCallable.h"
 #include "Error.h"
 #include "Expr.h"
+#include "Function.h"
+#include "NativeFunction.h"
 #include "Statement.h"
 #include "Token.h"
+#include "env/Env.h"
 #include "utls/Object.h"
 #include "utls/RuntimeError.h"
 #include <iostream>
@@ -17,8 +20,12 @@ Environment *Interpreter::environment;
 Environment *Interpreter::globals;
 
 Interpreter::Interpreter() {
-  globals = new Environment();
-  environment = globals;
+  if (!environment) {
+    globals = new Environment();
+    environment = globals;
+    Object clock(new ClockFunction());
+    environment->define("clock", clock);
+  }
 }
 
 void Interpreter::excecute(Statement *stmnt) {
@@ -40,6 +47,9 @@ void Interpreter::excecute(Statement *stmnt) {
     break;
   case StmntWhile_type:
     visitWhileStmnt((While *)stmnt);
+    break;
+  case StmntFunc_type:
+    visitFuncStmnt((Function *)stmnt);
     break;
   case StmntBreak_type:
     isBreakUsed = true;
@@ -152,8 +162,16 @@ void Interpreter::visitWhileStmnt(While *stmnt) {
       break;
   }
 }
+
+void Interpreter::visitFuncStmnt(Function *stmnt) {
+  Object declaration(new CruxFunction(stmnt));
+  environment->define(stmnt->name, declaration);
+}
+
 void Interpreter::visitBlockStmnt(Block *stmnt) {
-  excecuteBlock(stmnt->stmnt, new Environment(environment));
+  Environment *locals = new Environment(environment);
+  excecuteBlock(stmnt->stmnt, locals);
+  delete locals;
 }
 
 void Interpreter::excecuteBlock(std::vector<Statement *> stmnts,
@@ -201,7 +219,7 @@ Object Interpreter::visitCall(Call *stmnt) {
   std::vector<Object> arguments;
 
   for (auto args : stmnt->arguments) {
-    arguments.push_back(args);
+    arguments.push_back(evaluate(args));
   }
 
   if (callee.type != function_type) {
@@ -292,9 +310,4 @@ Object Interpreter::visitTernaryExp(Ternary *expr) {
     RuntimeError(*expr->op1, "Ternary Expression couldn't be evaluated");
   }
   return Object();
-}
-
-Interpreter::~Interpreter() {
-  delete environment;
-  delete globals;
 }

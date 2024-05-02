@@ -26,6 +26,8 @@ std::vector<Statement *> Parser::parse() {
 }
 
 Statement *Parser::declaration() {
+  if (match(FUN))
+    return function("function");
   if (match(VAR))
     return varDeclaration();
   return statement();
@@ -294,14 +296,31 @@ Expr *Parser::finishCall(Expr *expr) {
         error(peek(), "Can't have more than 255 arguments.");
       }
       arguments.push_back(expression());
-    } while (COMMA);
+    } while (match(COMMA));
   }
   consume(RIGHT_PAREN, "Expected ')' after arguments");
 
   return new Call(expr, new Token(previous()), arguments);
 }
 
-Statement *Parser::function(std::string str) {}
+Statement *Parser::function(std::string kind) {
+  Token *name = new Token(consume(IDENTIFIER, "Expect" + kind + "name"));
+  std::vector<Token *> params;
+  consume(LEFT_PAREN, "Expect ( after function name");
+  if (!check(RIGHT_PAREN)) {
+    do {
+      if (params.size() >= 225) {
+        Token tkn = peek();
+        crux::error(tkn, "Can't have more than 255 parameters");
+      }
+      params.push_back(new Token(consume(IDENTIFIER, "Expect parameter name")));
+    } while (match(COMMA));
+  }
+  consume(RIGHT_PAREN, "Expect ')' after parameters");
+  consume(LEFT_BRACE, "Expect '{' before body");
+  std::vector<Statement *> body = blockStatement();
+  return new Function(name, params, body);
+}
 
 Expr *Parser::primary() {
   if (match(FALSE))
@@ -312,9 +331,6 @@ Expr *Parser::primary() {
 
   if (match(NIL))
     return new Literal(new Object());
-
-  if (match(FUN))
-    return (Expr *)function("function");
 
   if (match(NUMBER)) {
     return new Literal(new Object(previous().literal));
