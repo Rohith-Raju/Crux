@@ -16,9 +16,6 @@
 #include <string>
 #include <vector>
 
-Environment *Interpreter::environment;
-Environment *Interpreter::globals;
-
 Interpreter::Interpreter() {
   if (!environment) {
     globals = new Environment();
@@ -51,8 +48,12 @@ void Interpreter::excecute(Statement *stmnt) {
   case StmntFunc_type:
     visitFuncStmnt((Function *)stmnt);
     break;
+  case StmntReturn_type:
+    visitReturnStmnt((Return *)stmnt);
+    break;
   case StmntBreak_type:
     isBreakUsed = true;
+    break;
   }
 }
 
@@ -102,7 +103,7 @@ void Interpreter::checkNumberOperand(Token *op, Object right) {
 }
 
 bool Interpreter::checkIfSameTypes(Object left, Object right) {
-  if (left.type == num_type && right.type == num_type)
+  if (left.type == right.type)
     return true;
   else
     return false;
@@ -168,22 +169,33 @@ void Interpreter::visitFuncStmnt(Function *stmnt) {
   environment->define(stmnt->name, declaration);
 }
 
+void Interpreter::visitReturnStmnt(Return *stmnt) {
+  returnObj = evaluate(stmnt->value);
+  isReturnUsed = true;
+}
+
 void Interpreter::visitBlockStmnt(Block *stmnt) {
   Environment *locals = new Environment(environment);
   excecuteBlock(stmnt->stmnt, locals);
-  delete locals;
 }
 
-void Interpreter::excecuteBlock(std::vector<Statement *> stmnts,
-                                Environment *env) {
+Object Interpreter::excecuteBlock(std::vector<Statement *> stmnts,
+                                  Environment *env) {
   Environment *previous = environment;
   environment = env;
   for (Statement *stmnt : stmnts) {
     excecute(stmnt);
-    if (crux::hadRuntimeError)
+    if (isBreakUsed || isReturnUsed || crux::hadRuntimeError)
       break;
   }
   environment = previous;
+
+  if (isReturnUsed) {
+    isReturnUsed = false;
+    return this->returnObj;
+  }
+
+  return Object();
 }
 
 Object Interpreter::visitVariableExp(Variable *expr) {
@@ -203,6 +215,7 @@ Object Interpreter::visitLogicalExp(Logical *expr) {
 
 Object Interpreter::visitAssignment(Assignment *expr) {
   Object value = evaluate(expr->value);
+
   environment->assign(expr->name, value);
   return value;
 }

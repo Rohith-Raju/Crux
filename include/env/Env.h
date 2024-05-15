@@ -16,7 +16,7 @@ private:
 
 public:
   Environment();
-  ~Environment();
+  //~Environment();
   Environment(Environment *enclosing);
   void define(Token *tkn, Object value);
   void define(std::string name, Object value);

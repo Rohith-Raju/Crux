@@ -14,7 +14,7 @@
 
 class Interpreter {
 private:
-  static Environment *environment;
+  Environment *environment;
 
   void excecute(Statement *stmnt);
 
@@ -31,13 +31,17 @@ private:
   bool checkCompatibility(Token *op, Object left, Object right);
 
 public:
-  static Environment *globals;
+  Environment *globals;
 
   Interpreter();
 
   bool isBreakUsed = false;
 
-  void excecuteBlock(std::vector<Statement *> stmnts, Environment *env);
+  bool isReturnUsed = false;
+
+  Object returnObj;
+
+  Object excecuteBlock(std::vector<Statement *> stmnts, Environment *env);
 
   void interpret(std::vector<Statement *> &statements);
 
@@ -54,6 +58,8 @@ public:
   void visitWhileStmnt(While *stmnt);
 
   void visitFuncStmnt(Function *stmnt);
+
+  void visitReturnStmnt(Return *stmnt);
 
   Object visitAssignment(Assignment *expr);
 

@@ -5,6 +5,7 @@
 #include "Scanner.h"
 #include "gtest/gtest.h"
 #include <Statement.h>
+#include <ios>
 #include <string>
 #include <vector>
 
@@ -56,8 +57,10 @@ TEST(InterpreterTest, TestVarStatement) {
   std::vector<Statement *> statement = parser.parse();
 
   testing::internal::CaptureStdout();
-  Interpreter{}.interpret(statement);
+  Interpreter *interpreter = new Interpreter();
+  interpreter->interpret(statement);
   std::string result = testing::internal::GetCapturedStdout();
+  delete interpreter;
 }
 
 TEST(InterpreterTest, TestIfStatement) {
@@ -67,7 +70,8 @@ TEST(InterpreterTest, TestIfStatement) {
   Parser p(tokens);
   std::vector<Statement *> statements = p.parse();
   testing::internal::CaptureStdout();
-  Interpreter{}.interpret(statements);
+  Interpreter *interpreter = new Interpreter();
+  interpreter->interpret(statements);
   std::string result = testing::internal::GetCapturedStdout();
   ASSERT_EQ(result, "equal\n");
 }
@@ -80,10 +84,11 @@ TEST(InterpreterTest, TestIfElseStatement) {
   Parser p(tokens);
   std::vector<Statement *> statements = p.parse();
   testing::internal::CaptureStdout();
-  Interpreter interpreter = Interpreter();
-  interpreter.interpret(statements);
+  Interpreter *interpreter = new Interpreter();
+  interpreter->interpret(statements);
   std::string result = testing::internal::GetCapturedStdout();
   ASSERT_EQ(result, "Not equal\n");
+  delete interpreter;
 }
 
 TEST(InterpreterTest, TestWhileLoop) {
@@ -93,9 +98,11 @@ TEST(InterpreterTest, TestWhileLoop) {
   Parser p(tokens);
   std::vector<Statement *> statements = p.parse();
   testing::internal::CaptureStdout();
-  Interpreter{}.interpret(statements);
+  Interpreter *interpreter = new Interpreter();
+  interpreter->interpret(statements);
   std::string result = testing::internal::GetCapturedStdout();
   ASSERT_EQ(result, "5.000000\n4.000000\n3.000000\n2.000000\n1.000000\n");
+  delete interpreter;
 }
 
 TEST(InterpreterTest, TestForLoop) {
@@ -105,7 +112,24 @@ TEST(InterpreterTest, TestForLoop) {
   Parser p(tokens);
   std::vector<Statement *> statements = p.parse();
   testing::internal::CaptureStdout();
-  Interpreter{}.interpret(statements);
+  Interpreter *interpreter = new Interpreter();
+  interpreter->interpret(statements);
   std::string result = testing::internal::GetCapturedStdout();
   ASSERT_EQ(result, "0.000000\n1.000000\n2.000000\n3.000000\n4.000000\n");
+  delete interpreter;
+}
+
+TEST(InterpreterTest, TestSimpleFunction) {
+  std::string test = "fun printWords(a,b){print a +\" \"+ b;} "
+                     "printWords(\"Hello\", \"World\");";
+  Scanner scan(test);
+  std::vector<Token> tokens = scan.scanTokens();
+  Parser p(tokens);
+  std::vector<Statement *> statements = p.parse();
+  testing::internal::CaptureStdout();
+  Interpreter *interpreter = new Interpreter();
+  interpreter->interpret(statements);
+  std::string result = testing::internal::GetCapturedStdout();
+  ASSERT_EQ(result, "Hello World\n");
+  delete interpreter;
 }

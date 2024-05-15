@@ -45,13 +45,14 @@ private:
   Statement *breakStatement();
   Statement *expressionStatement();
   Statement *function(std::string str);
+  Statement *returnStatement();
   std::vector<Statement *> blockStatement();
 
   // Variable stuff
   Statement *declaration();
   Statement *varDeclaration();
 
-  // helper functions
+  // Helper functions
   Expr *equality();
   bool check(TokenType type);
   Token advance();

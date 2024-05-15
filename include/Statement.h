@@ -17,7 +17,8 @@ enum Statement_type {
   StmntIf_type,
   StmntWhile_type,
   StmntBreak_type,
-  StmntFunc_type
+  StmntFunc_type,
+  StmntReturn_type
 };
 
 class Statement {
@@ -86,6 +87,13 @@ public:
 
   Function(Token *name, std::vector<Token *> params,
            std::vector<Statement *> body);
+};
+
+class Return : public Statement {
+public:
+  Token *keyword;
+  Expr *value;
+  Return(Token *keyword, Expr *value);
 };
 
 #endif

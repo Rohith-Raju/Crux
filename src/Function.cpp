@@ -17,8 +17,8 @@ Object CruxFunction::call(Interpreter *interpreter, std::vector<Object> args) {
   for (int i = 0; i < declaration->params.size(); i++) {
     env->define(declaration->params[i], args[i]);
   }
-  interpreter->excecuteBlock(declaration->body, env);
-  return Object();
+  Object value = interpreter->excecuteBlock(declaration->body, env);
+  return value;
 }
 
 std::string CruxFunction::str() {

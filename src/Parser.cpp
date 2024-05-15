@@ -57,6 +57,8 @@ Statement *Parser::statement() {
     return forStatement();
   if (match(BREAK))
     return breakStatement();
+  if (match(RETURN))
+    return returnStatement();
   if (match(LEFT_BRACE))
     return new Block(blockStatement());
   return expressionStatement();
@@ -320,6 +322,16 @@ Statement *Parser::function(std::string kind) {
   consume(LEFT_BRACE, "Expect '{' before body");
   std::vector<Statement *> body = blockStatement();
   return new Function(name, params, body);
+}
+
+Statement *Parser::returnStatement() {
+  Token *name = new Token(previous());
+  Expr *value = nullptr;
+  if (!check(SEMICOLON)) {
+    value = expression();
+  }
+  consume(SEMICOLON, "expected ; at the end of the statement");
+  return new Return(name, value);
 }
 
 Expr *Parser::primary() {

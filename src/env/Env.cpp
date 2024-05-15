@@ -9,20 +9,18 @@
 
 Environment::Environment() : enclosing(nullptr) {}
 
-Environment::~Environment() {
-  if (enclosing != nullptr) {
-    deepClean(enclosing);
-  }
-  values.clear();
-  enclosing = nullptr;
-}
+// Environment::~Environment() {
+//   if (enclosing != nullptr) {
+//     deepClean(enclosing);
+//   }
+//   enclosing = nullptr;
+// }
 
 void Environment::deepClean(Environment *enclosing) {
   if (enclosing != nullptr)
     deepClean(enclosing);
 
   enclosing->values.clear();
-  delete enclosing;
   enclosing = nullptr;
   return;
 }
@@ -34,7 +32,7 @@ void Environment::define(Token *tkn, Object value) {
 }
 
 void Environment::define(std::string name, Object value) {
-  values.emplace(name, value);
+  values.insert({name, value});
 }
 
 void Environment::assign(Token *name, Object value) {
@@ -55,8 +53,8 @@ Object Environment::get(Token *name) {
   if (values.find(name->lexeme) != values.end()) {
     Object obj = values[name->lexeme];
     if (obj.type == nullptr_type)
-      throw RuntimeError(*name, "Uninitalized variable " + name->lexeme +
-                                    " can't be computed");
+      throw RuntimeError(*name, "Uninitalized variable :" + name->lexeme +
+                                    " nil values can't be computed");
     return obj;
   }
 
