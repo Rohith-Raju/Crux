@@ -14,11 +14,7 @@
 
 class Interpreter {
 private:
-  Environment *environment = new Environment();
-
   void excecute(Statement *stmnt);
-
-  void excecuteBlock(std::vector<Statement *> stmnts, Environment *env);
 
   Object evaluate(Expr *expr);
 
@@ -33,7 +29,21 @@ private:
   bool checkCompatibility(Token *op, Object left, Object right);
 
 public:
+  Environment *globals = new Environment();
+
+private:
+  Environment *environment = globals;
+
+public:
+  Interpreter();
+
   bool isBreakUsed = false;
+
+  bool isReturnUsed = false;
+
+  Object returnObj;
+
+  Object excecuteBlock(std::vector<Statement *> stmnts, Environment *env);
 
   void interpret(std::vector<Statement *> &statements);
 
@@ -49,6 +59,10 @@ public:
 
   void visitWhileStmnt(While *stmnt);
 
+  void visitFuncStmnt(Function *stmnt);
+
+  void visitReturnStmnt(Return *stmnt);
+
   Object visitAssignment(Assignment *expr);
 
   Object visitLogicalExp(Logical *expr);
@@ -57,6 +71,8 @@ public:
 
   Object visitGroupExp(Grouping *expr);
 
+  Object visitCall(Call *stmnt);
+
   Object visitUnaryExp(Unary *expr);
 
   Object visitBinaryExp(Binary *expr);
@@ -64,8 +80,6 @@ public:
   Object visitTernaryExp(Ternary *expr);
 
   Object visitVariableExp(Variable *expr);
-
-  ~Interpreter();
 };
 
 #endif // CRUX_INTERPRETER_H

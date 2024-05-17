@@ -1,6 +1,4 @@
 //
-// Created by Rohith on 3/8/24
-//
 #include "Expr.h"
 #include "Interpreter.h"
 #include "Parser.h"
@@ -35,6 +33,7 @@ TEST(InterpreterTest, TestUnaryExpression) {
 }
 
 TEST(InterpreterTest, TestTernaryExpression) {
+
   std::string test = "print(3 > 1 ? true : false);";
   Scanner scan(test);
   std::vector<Token> tokens = scan.scanTokens();
@@ -95,7 +94,8 @@ TEST(InterpreterTest, TestWhileLoop) {
   Parser p(tokens);
   std::vector<Statement *> statements = p.parse();
   testing::internal::CaptureStdout();
-  Interpreter{}.interpret(statements);
+  Interpreter *interpreter = new Interpreter();
+  interpreter->interpret(statements);
   std::string result = testing::internal::GetCapturedStdout();
   ASSERT_EQ(result, "5.000000\n4.000000\n3.000000\n2.000000\n1.000000\n");
 }

@@ -26,6 +26,8 @@ std::vector<Statement *> Parser::parse() {
 }
 
 Statement *Parser::declaration() {
+  if (match(FUN))
+    return function("function");
   if (match(VAR))
     return varDeclaration();
   return statement();
@@ -55,6 +57,8 @@ Statement *Parser::statement() {
     return forStatement();
   if (match(BREAK))
     return breakStatement();
+  if (match(RETURN))
+    return returnStatement();
   if (match(LEFT_BRACE))
     return new Block(blockStatement());
   return expressionStatement();
@@ -270,7 +274,64 @@ Expr *Parser::unary() {
     Expr *right = primary();
     return new Unary(op, right);
   }
-  return primary();
+  return call();
+}
+
+Expr *Parser::call() {
+  Expr *expr = primary();
+
+  while (true) {
+    if (match(LEFT_PAREN)) {
+      expr = finishCall(expr);
+    } else {
+      break;
+    }
+  }
+  return expr;
+}
+
+Expr *Parser::finishCall(Expr *expr) {
+  std::vector<Expr *> arguments;
+  if (!check(RIGHT_PAREN)) {
+    do {
+      if (arguments.size() >= 255) {
+        error(peek(), "Can't have more than 255 arguments.");
+      }
+      arguments.push_back(expression());
+    } while (match(COMMA));
+  }
+  consume(RIGHT_PAREN, "Expected ')' after arguments");
+
+  return new Call(expr, new Token(previous()), arguments);
+}
+
+Statement *Parser::function(std::string kind) {
+  Token *name = new Token(consume(IDENTIFIER, "Expect" + kind + "name"));
+  std::vector<Token *> params;
+  consume(LEFT_PAREN, "Expect ( after function name");
+  if (!check(RIGHT_PAREN)) {
+    do {
+      if (params.size() >= 225) {
+        Token tkn = peek();
+        crux::error(tkn, "Can't have more than 255 parameters");
+      }
+      params.push_back(new Token(consume(IDENTIFIER, "Expect parameter name")));
+    } while (match(COMMA));
+  }
+  consume(RIGHT_PAREN, "Expect ')' after parameters");
+  consume(LEFT_BRACE, "Expect '{' before body");
+  std::vector<Statement *> body = blockStatement();
+  return new Function(name, params, body);
+}
+
+Statement *Parser::returnStatement() {
+  Token *name = new Token(previous());
+  Expr *value = nullptr;
+  if (!check(SEMICOLON)) {
+    value = expression();
+  }
+  consume(SEMICOLON, "expected ; at the end of the statement");
+  return new Return(name, value);
 }
 
 Expr *Parser::primary() {

@@ -1,15 +1,29 @@
 //
 
 #include "Interpreter.h"
+#include "CruxCallable.h"
 #include "Error.h"
 #include "Expr.h"
+#include "Function.h"
+#include "NativeFunction.h"
 #include "Statement.h"
 #include "Token.h"
+#include "env/Env.h"
 #include "utls/Object.h"
 #include "utls/RuntimeError.h"
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
+
+Interpreter::Interpreter() {
+  if (!environment) {
+    globals = new Environment();
+    environment = globals;
+    Object clock(new ClockFunction());
+    environment->define("clock", clock);
+  }
+}
 
 void Interpreter::excecute(Statement *stmnt) {
   switch (stmnt->type) {
@@ -31,8 +45,15 @@ void Interpreter::excecute(Statement *stmnt) {
   case StmntWhile_type:
     visitWhileStmnt((While *)stmnt);
     break;
+  case StmntFunc_type:
+    visitFuncStmnt((Function *)stmnt);
+    break;
+  case StmntReturn_type:
+    visitReturnStmnt((Return *)stmnt);
+    break;
   case StmntBreak_type:
     isBreakUsed = true;
+    break;
   }
 }
 
@@ -52,6 +73,8 @@ Object Interpreter::evaluate(Expr *expr) {
     return visitVariableExp((Variable *)expr);
   case ExprType_Assignment:
     return visitAssignment((Assignment *)expr);
+  case ExprType_Call:
+    return visitCall((Call *)expr);
   }
   return Object();
 }
@@ -80,7 +103,7 @@ void Interpreter::checkNumberOperand(Token *op, Object right) {
 }
 
 bool Interpreter::checkIfSameTypes(Object left, Object right) {
-  if (left.type == num_type && right.type == num_type)
+  if (left.type == right.type)
     return true;
   else
     return false;
@@ -140,20 +163,39 @@ void Interpreter::visitWhileStmnt(While *stmnt) {
       break;
   }
 }
-void Interpreter::visitBlockStmnt(Block *stmnt) {
-  excecuteBlock(stmnt->stmnt, new Environment(environment));
+
+void Interpreter::visitFuncStmnt(Function *stmnt) {
+  Object declaration(new CruxFunction(stmnt));
+  environment->define(stmnt->name, declaration);
 }
 
-void Interpreter::excecuteBlock(std::vector<Statement *> stmnts,
-                                Environment *env) {
+void Interpreter::visitReturnStmnt(Return *stmnt) {
+  returnObj = evaluate(stmnt->value);
+  isReturnUsed = true;
+}
+
+void Interpreter::visitBlockStmnt(Block *stmnt) {
+  Environment *locals = new Environment(environment);
+  excecuteBlock(stmnt->stmnt, locals);
+}
+
+Object Interpreter::excecuteBlock(std::vector<Statement *> stmnts,
+                                  Environment *env) {
   Environment *previous = environment;
   environment = env;
   for (Statement *stmnt : stmnts) {
     excecute(stmnt);
-    if (crux::hadRuntimeError)
+    if (isBreakUsed || isReturnUsed || crux::hadRuntimeError)
       break;
   }
   environment = previous;
+
+  if (isReturnUsed) {
+    isReturnUsed = false;
+    return this->returnObj;
+  }
+
+  return Object();
 }
 
 Object Interpreter::visitVariableExp(Variable *expr) {
@@ -173,6 +215,7 @@ Object Interpreter::visitLogicalExp(Logical *expr) {
 
 Object Interpreter::visitAssignment(Assignment *expr) {
   Object value = evaluate(expr->value);
+
   environment->assign(expr->name, value);
   return value;
 }
@@ -181,6 +224,31 @@ Object Interpreter::visitLiteral(Literal *expr) { return *expr->literal; }
 
 Object Interpreter::visitGroupExp(Grouping *expr) {
   return evaluate(expr->expression);
+}
+
+Object Interpreter::visitCall(Call *stmnt) {
+  Object callee = evaluate(stmnt->callee);
+
+  std::vector<Object> arguments;
+
+  for (auto args : stmnt->arguments) {
+    arguments.push_back(evaluate(args));
+  }
+
+  if (callee.type != function_type) {
+    throw RuntimeError(*stmnt->paren, "call only allowed on functions");
+  }
+
+  CruxCallable *function = callee.function;
+
+  if (arguments.size() != function->arity()) {
+    std::stringstream ss;
+    ss << "Expected " << function->arity() << " arguments but got "
+       << arguments.size();
+    RuntimeError(*stmnt->paren, ss.str());
+  }
+
+  return function->call(this, arguments);
 }
 
 Object Interpreter::visitUnaryExp(Unary *expr) {
@@ -256,5 +324,3 @@ Object Interpreter::visitTernaryExp(Ternary *expr) {
   }
   return Object();
 }
-
-Interpreter::~Interpreter() { delete environment; }

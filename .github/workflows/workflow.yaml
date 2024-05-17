@@ -14,8 +14,8 @@ jobs:
       - name: Configure Project
         uses: threeal/cmake-action@v1.3.0
         with: 
-          c-compiler: gcc
-          cxx-compiler: g++
+          c-compiler: clang 
+          cxx-compiler: clang++
           cxx-flags: "--std=c++17"
 
       - name: Build Project

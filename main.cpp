@@ -2,11 +2,41 @@
 #include "Interpreter.h"
 #include "Scanner.h"
 #include <Parser.h>
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <memory>
+#include <ostream>
+#include <sstream>
+#include <string>
 #include <vector>
 
+namespace fs = std::filesystem;
+
 void runCode(std::string source);
+
+std::string readFile(fs::path path) {
+  if (path.extension() != ".crux") {
+    std::cerr << "Filename " << path.filename()
+              << " should end with the extension \".crux\" \n";
+    exit(64);
+  }
+
+  std::ostringstream data;
+  std::fstream file(path, std::ios_base::in);
+  if (!file.is_open()) {
+    std::cerr << "File could't be found or opened \n";
+    exit(64);
+  }
+  data << file.rdbuf();
+  return data.str();
+}
+
+void runFile(std::string path) {
+  fs::path fPath(path);
+  runCode(readFile(fPath));
+}
 
 void runPromt() {
   for (;;) {
@@ -25,16 +55,25 @@ void runPromt() {
   }
 }
 
+Interpreter interpreter{};
+
 void runCode(std::string source) {
   Scanner scanner(source);
   std::vector<Token> tokens = scanner.scanTokens();
   Parser parser(tokens);
   std::vector<Statement *> expression = parser.parse();
-  std::unique_ptr<Interpreter> interpreter = std::make_unique<Interpreter>();
-  interpreter->interpret(expression);
+  interpreter.interpret(expression);
 }
 
-int main() {
-  runPromt();
+int main(int argc, char *argv[]) {
+  if (argc > 2) {
+    std::cout << "usage: crux <script>\n";
+    std::cout << "using repl: ./crux\n";
+    exit(64);
+  } else if (argc == 2) {
+    runFile(argv[1]);
+  } else {
+    runPromt();
+  }
   return 0;
 }

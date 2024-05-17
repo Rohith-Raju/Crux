@@ -3,12 +3,33 @@
 //
 
 #include "env/Env.h"
+#include "Token.h"
 #include "utls/Object.h"
 #include "utls/RuntimeError.h"
 
 Environment::Environment() : enclosing(nullptr) {}
 
+// Environment::~Environment() {
+//   if (enclosing != nullptr) {
+//     deepClean(enclosing);
+//   }
+//   enclosing = nullptr;
+// }
+
+void Environment::deepClean(Environment *enclosing) {
+  if (enclosing != nullptr)
+    deepClean(enclosing);
+
+  enclosing->values.clear();
+  enclosing = nullptr;
+  return;
+}
+
 Environment::Environment(Environment *enclosing) : enclosing(enclosing) {}
+
+void Environment::define(Token *tkn, Object value) {
+  define(tkn->lexeme, value);
+}
 
 void Environment::define(std::string name, Object value) {
   values.insert({name, value});
@@ -32,9 +53,9 @@ Object Environment::get(Token *name) {
   if (values.find(name->lexeme) != values.end()) {
     Object obj = values[name->lexeme];
     if (obj.type == nullptr_type)
-      throw RuntimeError(*name, "Uninitalized variable " + name->lexeme +
-                                    " can't be computed");
-    return values[name->lexeme];
+      throw RuntimeError(*name, "Uninitalized variable :" + name->lexeme +
+                                    " nil values can't be computed");
+    return obj;
   }
 
   if (enclosing != nullptr) {
@@ -42,5 +63,3 @@ Object Environment::get(Token *name) {
   }
   throw RuntimeError(*name, "Unexpected variable " + name->lexeme);
 }
-
-Environment::~Environment() { delete enclosing; }

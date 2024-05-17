@@ -46,3 +46,10 @@ While::~While() {
 
 Break::Break(bool isBrkPre)
     : Statement(StmntBreak_type), isBreakPresent(isBrkPre) {}
+
+Function::Function(Token *name, std::vector<Token *> params,
+                   std::vector<Statement *> body)
+    : Statement(StmntFunc_type), name(name), params(params), body(body) {}
+
+Return::Return(Token *keyword, Expr *value)
+    : Statement(StmntReturn_type), keyword(keyword), value(value) {}

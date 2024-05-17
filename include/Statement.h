@@ -6,6 +6,7 @@
 #define CRUX_STATEMENT_H
 
 #include "Expr.h"
+#include "Token.h"
 #include <vector>
 
 enum Statement_type {
@@ -15,7 +16,9 @@ enum Statement_type {
   StmntBlock_type,
   StmntIf_type,
   StmntWhile_type,
-  StmntBreak_type
+  StmntBreak_type,
+  StmntFunc_type,
+  StmntReturn_type
 };
 
 class Statement {
@@ -74,6 +77,23 @@ class Break : public Statement {
 public:
   bool isBreakPresent = false;
   Break(bool breakSet);
+};
+
+class Function : public Statement {
+public:
+  Token *name;
+  std::vector<Token *> params;
+  std::vector<Statement *> body;
+
+  Function(Token *name, std::vector<Token *> params,
+           std::vector<Statement *> body);
+};
+
+class Return : public Statement {
+public:
+  Token *keyword;
+  Expr *value;
+  Return(Token *keyword, Expr *value);
 };
 
 #endif
