@@ -14,8 +14,6 @@
 
 class Interpreter {
 private:
-  Environment *environment;
-
   void excecute(Statement *stmnt);
 
   Object evaluate(Expr *expr);
@@ -31,8 +29,12 @@ private:
   bool checkCompatibility(Token *op, Object left, Object right);
 
 public:
-  Environment *globals;
+  Environment *globals = new Environment();
 
+private:
+  Environment *environment = globals;
+
+public:
   Interpreter();
 
   bool isBreakUsed = false;

@@ -5,7 +5,6 @@
 #include "Scanner.h"
 #include "gtest/gtest.h"
 #include <Statement.h>
-#include <ios>
 #include <string>
 #include <vector>
 
@@ -48,19 +47,15 @@ TEST(InterpreterTest, TestTernaryExpression) {
 
 TEST(InterpreterTest, TestVarStatement) {
   std::string test = "var a = 10; print(a);";
-
   Scanner scan(test);
-
   std::vector<Token> token = scan.scanTokens();
-
   Parser parser(token);
   std::vector<Statement *> statement = parser.parse();
-
   testing::internal::CaptureStdout();
   Interpreter *interpreter = new Interpreter();
   interpreter->interpret(statement);
   std::string result = testing::internal::GetCapturedStdout();
-  delete interpreter;
+  ASSERT_EQ(result, "10.000000\n");
 }
 
 TEST(InterpreterTest, TestIfStatement) {
@@ -102,7 +97,6 @@ TEST(InterpreterTest, TestWhileLoop) {
   interpreter->interpret(statements);
   std::string result = testing::internal::GetCapturedStdout();
   ASSERT_EQ(result, "5.000000\n4.000000\n3.000000\n2.000000\n1.000000\n");
-  delete interpreter;
 }
 
 TEST(InterpreterTest, TestForLoop) {
@@ -116,7 +110,6 @@ TEST(InterpreterTest, TestForLoop) {
   interpreter->interpret(statements);
   std::string result = testing::internal::GetCapturedStdout();
   ASSERT_EQ(result, "0.000000\n1.000000\n2.000000\n3.000000\n4.000000\n");
-  delete interpreter;
 }
 
 TEST(InterpreterTest, TestSimpleFunction) {
@@ -131,5 +124,4 @@ TEST(InterpreterTest, TestSimpleFunction) {
   interpreter->interpret(statements);
   std::string result = testing::internal::GetCapturedStdout();
   ASSERT_EQ(result, "Hello World\n");
-  delete interpreter;
 }
