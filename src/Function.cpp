@@ -8,12 +8,13 @@
 #include "utls/Object.h"
 #include <string>
 
-CruxFunction::CruxFunction(Function *declaration) : declaration(declaration) {}
+CruxFunction::CruxFunction(Function *declaration, Environment *closure)
+    : declaration(declaration), closure(closure) {}
 
 int CruxFunction::arity() { return declaration->params.size(); }
 
 Object CruxFunction::call(Interpreter *interpreter, std::vector<Object> args) {
-  Environment *env = new Environment(interpreter->globals);
+  Environment *env = new Environment(closure);
   for (int i = 0; i < declaration->params.size(); i++) {
     env->define(declaration->params[i], args[i]);
   }

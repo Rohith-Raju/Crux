@@ -47,6 +47,8 @@ public:
 
   void interpret(std::vector<Statement *> &statements);
 
+  void resolve();
+
   void visitPrintStmnt(Print *stmnt);
 
   void visitBlockStmnt(Block *stmnt);

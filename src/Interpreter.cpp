@@ -73,6 +73,8 @@ Object Interpreter::evaluate(Expr *expr) {
     return visitVariableExp((Variable *)expr);
   case ExprType_Assignment:
     return visitAssignment((Assignment *)expr);
+  case ExprType_Logical:
+    return visitLogicalExp((Logical *)expr);
   case ExprType_Call:
     return visitCall((Call *)expr);
   }
@@ -165,7 +167,7 @@ void Interpreter::visitWhileStmnt(While *stmnt) {
 }
 
 void Interpreter::visitFuncStmnt(Function *stmnt) {
-  Object declaration(new CruxFunction(stmnt));
+  Object declaration(new CruxFunction(stmnt, environment));
   environment->define(stmnt->name, declaration);
 }
 
