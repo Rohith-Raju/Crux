@@ -10,6 +10,7 @@
 #include "Token.h"
 #include "env/Env.h"
 #include "utls/Object.h"
+#include <unordered_map>
 #include <vector>
 
 class Interpreter {
@@ -33,6 +34,7 @@ public:
 
 private:
   Environment *environment = globals;
+  std::unordered_map<Expr *, int> locals;
 
 public:
   Interpreter();
@@ -47,7 +49,9 @@ public:
 
   void interpret(std::vector<Statement *> &statements);
 
-  void resolve();
+  void resolve(Expr *expr, int depth);
+
+  Object lookUpVariable(Token *name, Expr *expr);
 
   void visitPrintStmnt(Print *stmnt);
 

@@ -3,12 +3,13 @@
 #define CRUX_RESOLVER_H
 
 #include "Interpreter.h"
-#include <stack>
 #include <unordered_map>
 #include <vector>
 
+enum FunctionType { FunctionType_None, FunctionType_Function };
+
 struct varFlags {
-  bool isInitilised;
+  bool isInitilized;
   bool isReferenced;
 };
 
@@ -17,9 +18,10 @@ class Resolver {
 private:
   std::vector<std::unordered_map<std::string, varFlags> *> scopes;
   Interpreter *interpreter;
-  Resolver(Interpreter *interpreter);
+  FunctionType currentFunction = FunctionType_None;
 
 public:
+  Resolver(Interpreter *interpreter);
   void resolve(std::vector<Statement *> stmnts);
   void resolve(Expr *expr);
   void resolve(Statement *stmnt);
@@ -31,6 +33,7 @@ public:
   void define(Token *name);
 
   void resolveLocal(Expr *expr, Token *name);
+  void resolveFunction(Function *stmnt, FunctionType type);
 
   Object excecuteBlock(std::vector<Statement *> stmnts, Environment *env);
 

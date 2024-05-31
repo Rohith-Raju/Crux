@@ -1,12 +1,12 @@
 #include "Error.h"
 #include "Interpreter.h"
+#include "Resolver.h"
 #include "Scanner.h"
 #include <Parser.h>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <memory>
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -61,8 +61,12 @@ void runCode(std::string source) {
   Scanner scanner(source);
   std::vector<Token> tokens = scanner.scanTokens();
   Parser parser(tokens);
-  std::vector<Statement *> expression = parser.parse();
-  interpreter.interpret(expression);
+  std::vector<Statement *> statements = parser.parse();
+  Resolver *resolver = new Resolver(&interpreter);
+  resolver->resolve(statements);
+  if (crux::hadRuntimeError)
+    return;
+  interpreter.interpret(statements);
 }
 
 int main(int argc, char *argv[]) {

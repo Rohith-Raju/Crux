@@ -49,6 +49,10 @@ void Environment::assign(Token *name, Object value) {
   throw RuntimeError(*name, "Undefined variable " + name->lexeme);
 }
 
+void Environment::assignAt(int distance, Token *name, Object value) {
+  ancestor(distance)->values[name->lexeme] = value;
+}
+
 Object Environment::get(Token *name) {
   if (values.find(name->lexeme) != values.end()) {
     Object obj = values[name->lexeme];
@@ -62,4 +66,16 @@ Object Environment::get(Token *name) {
     return enclosing->get(name);
   }
   throw RuntimeError(*name, "Unexpected variable " + name->lexeme);
+}
+
+Object Environment::getAt(int distance, std::string name) {
+  return ancestor(distance)->values[name];
+}
+
+Environment *Environment::ancestor(int distance) {
+  Environment *env = this;
+  for (int i = 0; i < distance; i++) {
+    env = env->enclosing;
+  }
+  return env;
 }

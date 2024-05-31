@@ -7,6 +7,7 @@ set(Sources Error.cpp
 				Interpreter.cpp
 				Statement.cpp
 				Function.cpp
+				Resolver.cpp
 				env/Env.cpp
 )
 
