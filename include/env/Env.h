@@ -7,6 +7,7 @@
 
 #include "Token.h"
 #include "utls/Object.h"
+#include <string>
 #include <unordered_map>
 
 class Environment {
@@ -21,8 +22,11 @@ public:
   void define(Token *tkn, Object value);
   void define(std::string name, Object value);
   void assign(Token *name, Object value);
+  void assignAt(int distance, Token *name, Object value);
   Object get(Token *name);
   void deepClean(Environment *enclosing);
+  Object getAt(int distance, std::string name);
+  Environment *ancestor(int distance);
 };
 
 #endif

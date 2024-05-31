@@ -2,6 +2,7 @@
 #include "Expr.h"
 #include "Interpreter.h"
 #include "Parser.h"
+#include "Resolver.h"
 #include "Scanner.h"
 #include "gtest/gtest.h"
 #include <Statement.h>
@@ -95,6 +96,8 @@ TEST(InterpreterTest, TestWhileLoop) {
   std::vector<Statement *> statements = p.parse();
   testing::internal::CaptureStdout();
   Interpreter *interpreter = new Interpreter();
+  Resolver *resolver = new Resolver(interpreter);
+  resolver->resolve(statements);
   interpreter->interpret(statements);
   std::string result = testing::internal::GetCapturedStdout();
   ASSERT_EQ(result, "5.000000\n4.000000\n3.000000\n2.000000\n1.000000\n");
@@ -107,7 +110,10 @@ TEST(InterpreterTest, TestForLoop) {
   Parser p(tokens);
   std::vector<Statement *> statements = p.parse();
   testing::internal::CaptureStdout();
-  Interpreter{}.interpret(statements);
+  Interpreter *interpreter = new Interpreter();
+  Resolver *resolver = new Resolver(interpreter);
+  resolver->resolve(statements);
+  interpreter->interpret(statements);
   std::string result = testing::internal::GetCapturedStdout();
   ASSERT_EQ(result, "0.000000\n1.000000\n2.000000\n3.000000\n4.000000\n");
 }

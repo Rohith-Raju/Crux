@@ -1,10 +1,12 @@
 //
+// Resolver.cpp
 //
-//
+
 #include "Resolver.h"
 #include "Error.h"
 #include "Expr.h"
 #include "Statement.h"
+#include "Token.h"
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -85,22 +87,27 @@ void Resolver::declare(Token *name) {
   if (scopes.empty())
     return;
   std::unordered_map<std::string, varFlags> *scope = scopes.back();
+
+  if (scope->find(name->lexeme) != scope->end())
+    crux::error(*name, "Variable already declared with the same name");
+
   (*scope)[name->lexeme].isReferenced = false;
-  (*scope)[name->lexeme].isInitilised = false;
+  (*scope)[name->lexeme].isInitilized = false;
 }
 
 void Resolver::define(Token *name) {
   if (scopes.empty())
     return;
   std::unordered_map<std::string, varFlags> *scope = scopes.back();
-  (*scope)[name->lexeme].isInitilised = true;
+  (*scope)[name->lexeme].isInitilized = true;
 }
 
 void Resolver::resolveLocal(Expr *expr, Token *name) {
-  for (int i = scopes.size(); i >= 0; i--) {
-    if (scopes[i]->find(name->lexeme) != scopes[i]->end())
-      interpreter.resolve(expr, scopes.size() - i - 1);
-    return;
+  for (int i = scopes.size() - 1; i >= 0; i--) {
+    if (scopes[i]->find(name->lexeme) != scopes[i]->end()) {
+      interpreter->resolve(expr, scopes.size() - i - 1);
+      return;
+    }
   }
 }
 
@@ -122,7 +129,7 @@ void Resolver::visitVariableExp(Variable *expr) {
   if (!scopes.empty()) {
     auto scope = scopes.back();
     auto it = scope->find(expr->name->lexeme);
-    if (it != scope->end() && !it->second.isInitilised == true)
+    if (it != scope->end() && !it->second.isInitilized == true)
       crux::error(*expr->name,
                   "Can't read local variable in its own initializer.");
   }
@@ -132,4 +139,75 @@ void Resolver::visitVariableExp(Variable *expr) {
 void Resolver::visitAssignment(Assignment *expr) {
   resolve(expr->value);
   resolveLocal(expr, expr->name);
+}
+
+void Resolver::visitFuncStmnt(Function *stmnt) {
+  declare(stmnt->name);
+  define(stmnt->name);
+  resolveFunction(stmnt, FunctionType_Function);
+}
+
+void Resolver::resolveFunction(Function *stmnt, FunctionType type) {
+  FunctionType enclosingFunction = currentFunction;
+  currentFunction = type;
+  beginScope();
+  for (Token *params : stmnt->params) {
+    declare(params);
+    define(params);
+  }
+  resolve(stmnt->body);
+  endScope();
+  currentFunction = enclosingFunction;
+}
+
+void Resolver::visitExprStmnt(Expression *stmnt) { resolve(stmnt->expression); }
+
+void Resolver::visitIfStmnt(If *stmnt) {
+  resolve(stmnt->condition);
+  resolve(stmnt->thenBranch);
+  if (stmnt->elseBranch)
+    resolve(stmnt->elseBranch);
+}
+
+void Resolver::visitPrintStmnt(Print *expr) { resolve(expr->expression); }
+
+void Resolver::visitReturnStmnt(Return *expr) {
+  if (currentFunction == FunctionType_None) {
+    crux::error(*expr->keyword, "Can't return from top level");
+  }
+  if (expr->value)
+    resolve(expr->value);
+}
+
+void Resolver::visitWhileStmnt(While *stmnt) {
+  resolve(stmnt->condition);
+  resolve(stmnt->body);
+}
+
+void Resolver::visitBinaryExp(Binary *expr) {
+  resolve(expr->left);
+  resolve(expr->right);
+}
+
+void Resolver::visitCall(Call *expr) {
+  resolve(expr->callee);
+  for (Expr *arg : expr->arguments)
+    resolve(arg);
+}
+
+void Resolver::visitGroupExp(Grouping *expr) { resolve(expr->expression); }
+
+void Resolver::visitLiteral(Literal *expr) { return; }
+
+void Resolver::visitLogicalExp(Logical *expr) {
+  resolve(expr->left);
+  resolve(expr->right);
+}
+
+void Resolver::visitUnaryExp(Unary *expr) { resolve(expr->right); }
+
+void Resolver::visitTernaryExp(Ternary *expr) {
+  resolve(expr->condition);
+  resolve(expr->expression1);
+  resolve(expr->expression2);
 }

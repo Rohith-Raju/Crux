@@ -21,7 +21,7 @@ Interpreter::Interpreter() {
     globals = new Environment();
     environment = globals;
     Object clock(new ClockFunction());
-    environment->define("clock", clock);
+    globals->define("clock", clock);
   }
 }
 
@@ -56,6 +56,8 @@ void Interpreter::excecute(Statement *stmnt) {
     break;
   }
 }
+
+void Interpreter::resolve(Expr *expr, int depth) { locals[expr] = depth; }
 
 Object Interpreter::evaluate(Expr *expr) {
   switch (expr->type) {
@@ -177,8 +179,8 @@ void Interpreter::visitReturnStmnt(Return *stmnt) {
 }
 
 void Interpreter::visitBlockStmnt(Block *stmnt) {
-  Environment *locals = new Environment(environment);
-  excecuteBlock(stmnt->stmnt, locals);
+  Environment vars(environment);
+  excecuteBlock(stmnt->stmnt, &vars);
 }
 
 Object Interpreter::excecuteBlock(std::vector<Statement *> stmnts,
@@ -201,7 +203,15 @@ Object Interpreter::excecuteBlock(std::vector<Statement *> stmnts,
 }
 
 Object Interpreter::visitVariableExp(Variable *expr) {
-  return environment->get(expr->name);
+  return lookUpVariable(expr->name, expr);
+}
+
+Object Interpreter::lookUpVariable(Token *name, Expr *expr) {
+  auto it = locals.find(expr);
+  if (it != locals.end())
+    return environment->getAt(it->second, name->lexeme);
+  else
+    return globals->get(name);
 }
 
 Object Interpreter::visitLogicalExp(Logical *expr) {
@@ -218,7 +228,13 @@ Object Interpreter::visitLogicalExp(Logical *expr) {
 Object Interpreter::visitAssignment(Assignment *expr) {
   Object value = evaluate(expr->value);
 
-  environment->assign(expr->name, value);
+  auto it = locals.find(expr);
+
+  if (it != locals.end())
+    environment->assignAt(it->second, expr->name, value);
+  else
+    globals->assign(expr->name, value);
+
   return value;
 }
 
