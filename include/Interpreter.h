@@ -69,6 +69,8 @@ public:
 
   void visitReturnStmnt(Return *stmnt);
 
+  void visitClassStmnt(Class *stmnt);
+
   Object visitAssignment(Assignment *expr);
 
   Object visitLogicalExp(Logical *expr);
@@ -86,6 +88,8 @@ public:
   Object visitTernaryExp(Ternary *expr);
 
   Object visitVariableExp(Variable *expr);
+
+  Object visitGetExp(Get *expr);
 };
 
 #endif // CRUX_INTERPRETER_H

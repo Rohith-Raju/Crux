@@ -53,3 +53,6 @@ Function::Function(Token *name, std::vector<Token *> params,
 
 Return::Return(Token *keyword, Expr *value)
     : Statement(StmntReturn_type), keyword(keyword), value(value) {}
+
+Class ::Class(Token *name, std::vector<Function *> methods)
+    : Statement(StmntClass_type), name(name), methods(methods) {}

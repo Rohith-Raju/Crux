@@ -45,6 +45,8 @@ void Resolver::resolve(Statement *stmnt) {
   case StmntReturn_type:
     visitReturnStmnt((Return *)stmnt);
     break;
+  case StmntClass_type:
+    visitClassStmnt((Class *)stmnt);
   case StmntBreak_type:
     break;
   }
@@ -70,6 +72,8 @@ void Resolver::resolve(Expr *expr) {
     return visitLogicalExp((Logical *)expr);
   case ExprType_Call:
     return visitCall((Call *)expr);
+  case ExprType_Get:
+    return visitGetExp((Get *)expr);
   }
 }
 
@@ -211,3 +215,10 @@ void Resolver::visitTernaryExp(Ternary *expr) {
   resolve(expr->expression1);
   resolve(expr->expression2);
 }
+
+void Resolver::visitClassStmnt(Class *stmnt) {
+  declare(stmnt->name);
+  define(stmnt->name);
+}
+
+void Resolver::visitGetExp(Get *expr) { resolve(expr->object); }

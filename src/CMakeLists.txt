@@ -8,6 +8,7 @@ set(Sources Error.cpp
 				Statement.cpp
 				Function.cpp
 				Resolver.cpp
+				CruxClass.cpp
 				env/Env.cpp
 )
 

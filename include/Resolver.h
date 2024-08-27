@@ -72,6 +72,10 @@ public:
   void visitTernaryExp(Ternary *expr);
 
   void visitVariableExp(Variable *expr);
+
+  void visitClassStmnt(Class *stmnt);
+
+  void visitGetExp(Get *expr);
 };
 
 #endif // CRUX_RESOLVER_H

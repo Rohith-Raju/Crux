@@ -76,3 +76,20 @@ Assignment::~Assignment() {
   delete name;
   delete value;
 }
+
+Get::Get(Token *name, Expr *object)
+    : Expr(ExprType_Get), name(name), object(object) {}
+
+Get::~Get() {
+  delete name;
+  delete object;
+}
+
+Set::Set(Expr *object, Token *name, Expr *value)
+    : Expr(ExprType_Set), object(object), name(name), value(value) {}
+
+Set::~Set() {
+  delete object;
+  delete name;
+  delete value;
+}

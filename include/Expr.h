@@ -15,7 +15,9 @@ enum ExprType {
   ExprType_Variable,
   ExprType_Assignment,
   ExprType_Logical,
-  ExprType_Call
+  ExprType_Call,
+  ExprType_Get,
+  ExprType_Set
 };
 
 class Expr {
@@ -118,6 +120,27 @@ public:
   Assignment(Token *name, Expr *value);
 
   ~Assignment();
+};
+
+class Get : public Expr {
+public:
+  Token *name;
+
+  Expr *object;
+
+  Get(Token *name, Expr *object);
+
+  ~Get();
+};
+
+class Set : public Expr {
+public:
+  Expr *object;
+  Token *name;
+  Expr *value;
+
+  Set(Expr *object, Token *name, Expr *value);
+  ~Set();
 };
 
 #endif

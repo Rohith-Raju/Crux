@@ -26,11 +26,28 @@ std::vector<Statement *> Parser::parse() {
 }
 
 Statement *Parser::declaration() {
+  if (match(CLASS))
+    return classDeclaration();
   if (match(FUN))
-    return function("function");
+    return (Statement *)function("function");
   if (match(VAR))
     return varDeclaration();
   return statement();
+}
+
+Statement *Parser::classDeclaration() {
+  Token name = consume(IDENTIFIER, "Expect class name");
+  consume(LEFT_BRACE, "Expect { after class name");
+
+  std::vector<Function *> methods;
+
+  while (!check(RIGHT_BRACE) && !isAtEnd()) {
+    methods.push_back((Function *)function("methods"));
+  }
+
+  consume(RIGHT_BRACE, "Expect '}' after class body");
+
+  return new Class(new Token(name), methods);
 }
 
 Statement *Parser::varDeclaration() {
@@ -283,6 +300,9 @@ Expr *Parser::call() {
   while (true) {
     if (match(LEFT_PAREN)) {
       expr = finishCall(expr);
+    } else if (match(DOT)) {
+      Token name = consume(IDENTIFIER, "Expect Property Name after .");
+      expr = new Get(new Token(name), expr);
     } else {
       break;
     }
@@ -305,7 +325,7 @@ Expr *Parser::finishCall(Expr *expr) {
   return new Call(expr, new Token(previous()), arguments);
 }
 
-Statement *Parser::function(std::string kind) {
+void *Parser::function(std::string kind) {
   Token *name = new Token(consume(IDENTIFIER, "Expect" + kind + "name"));
   std::vector<Token *> params;
   consume(LEFT_PAREN, "Expect ( after function name");

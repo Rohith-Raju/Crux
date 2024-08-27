@@ -18,7 +18,8 @@ enum Statement_type {
   StmntWhile_type,
   StmntBreak_type,
   StmntFunc_type,
-  StmntReturn_type
+  StmntReturn_type,
+  StmntClass_type
 };
 
 class Statement {
@@ -94,6 +95,13 @@ public:
   Token *keyword;
   Expr *value;
   Return(Token *keyword, Expr *value);
+};
+
+class Class : public Statement {
+public:
+  Token *name;
+  std::vector<Function *> methods;
+  Class(Token *name, std::vector<Function *> methods);
 };
 
 #endif

@@ -2,6 +2,8 @@
 
 #include "Interpreter.h"
 #include "CruxCallable.h"
+#include "CruxClass.h"
+#include "CruxInstance.h"
 #include "Error.h"
 #include "Expr.h"
 #include "Function.h"
@@ -50,6 +52,9 @@ void Interpreter::excecute(Statement *stmnt) {
     break;
   case StmntReturn_type:
     visitReturnStmnt((Return *)stmnt);
+    break;
+  case StmntClass_type:
+    visitClassStmnt((Class *)stmnt);
     break;
   case StmntBreak_type:
     isBreakUsed = true;
@@ -253,20 +258,21 @@ Object Interpreter::visitCall(Call *stmnt) {
     arguments.push_back(evaluate(args));
   }
 
-  if (callee.type != function_type) {
+  if (callee.type != function_type && callee.type != class_type) {
     throw RuntimeError(*stmnt->paren, "call only allowed on functions");
   }
 
-  CruxCallable *function = callee.function;
+  CruxCallable *callable =
+      callee.type == function_type ? callee.function : callee.klass;
 
-  if (arguments.size() != function->arity()) {
+  if (arguments.size() != callable->arity()) {
     std::stringstream ss;
-    ss << "Expected " << function->arity() << " arguments but got "
+    ss << "Expected " << callable->arity() << " arguments but got "
        << arguments.size();
     RuntimeError(*stmnt->paren, ss.str());
   }
 
-  return function->call(this, arguments);
+  return callable->call(this, arguments);
 }
 
 Object Interpreter::visitUnaryExp(Unary *expr) {
@@ -330,6 +336,13 @@ Object Interpreter::visitBinaryExp(Binary *expr) {
   throw RuntimeError(*op, "Operator not found");
 }
 
+Object Interpreter::visitGetExp(Get *expr) {
+  Object obj = evaluate(expr->object);
+  if (obj.type == instance_type)
+    return obj.instance->get(expr->name);
+  throw RuntimeError(*expr->name, "Only instances have properties");
+}
+
 Object Interpreter::visitTernaryExp(Ternary *expr) {
   Object condition = evaluate(expr->condition);
   if (condition.type == bool_type) {
@@ -341,4 +354,10 @@ Object Interpreter::visitTernaryExp(Ternary *expr) {
     RuntimeError(*expr->op1, "Ternary Expression couldn't be evaluated");
   }
   return Object();
+}
+
+void Interpreter::visitClassStmnt(Class *stmnt) {
+  environment->define(stmnt->name->lexeme, Object());
+  Object klass(new CruxClass(stmnt->name->lexeme));
+  environment->assign(stmnt->name, klass);
 }

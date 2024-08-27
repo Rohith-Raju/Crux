@@ -3,6 +3,8 @@
 //
 #include "utls/Object.h"
 #include "CruxCallable.h"
+#include "CruxClass.h"
+#include "CruxInstance.h"
 
 Object::Object() { type = nullptr_type; }
 
@@ -26,6 +28,16 @@ Object::Object(CruxCallable *type) {
   function = type;
 }
 
+Object::Object(CruxClass *type) {
+  this->type = class_type;
+  klass = type;
+}
+
+Object::Object(CruxInstance *type) {
+  this->type = instance_type;
+  instance = type;
+}
+
 std::string Object::str() {
   if (type == string_type) {
     return string_literal;
@@ -42,6 +54,11 @@ std::string Object::str() {
   if (type == function_type) {
     return function->str();
   }
-
+  if (type == class_type) {
+    return klass->str();
+  }
+  if (type == instance_type) {
+    return instance->str();
+  }
   return "";
 }

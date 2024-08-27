@@ -44,9 +44,10 @@ private:
   Statement *forStatement();
   Statement *breakStatement();
   Statement *expressionStatement();
-  Statement *function(std::string str);
+  void *function(std::string str);
   Statement *returnStatement();
   std::vector<Statement *> blockStatement();
+  Statement *classDeclaration();
 
   // Variable stuff
   Statement *declaration();
